@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akademi Pengekodan: Reka Bentuk Pangkalan Data Hubungan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .nav-item.active {
+            background-color: #f97316; /* Orange 500 */
+            color: white;
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen overflow-hidden selection:bg-orange-500 selection:text-white bg-slate-900">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center z-30">
+        <h1 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fas fa-sitemap text-orange-500"></i> Akademi Kod (2.2)
+        </h1>
+        <button id="mobile-menu-btn" class="text-slate-300 hover:text-white focus:outline-none">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/80 z-40 hidden md:hidden backdrop-blur-sm transition-opacity"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 z-50 w-72 bg-slate-800 border-r border-slate-700 flex flex-col h-full shadow-2xl md:shadow-none">
+        <div class="p-6 border-b border-slate-700 hidden md:block">
+            <h1 class="text-xl font-bold text-white flex items-center gap-3">
+                <i class="fas fa-sitemap text-orange-500"></i>
+                Akademi Kod
+            </h1>
+            <p class="text-xs text-slate-400 mt-2">Sains Komputer - Topik 2.2</p>
+        </div>
+        
+        <div class="p-4 md:hidden flex justify-between items-center border-b border-slate-700">
+            <span class="text-white font-bold text-lg">Menu Navigasi</span>
+            <button id="close-sidebar-btn" class="text-slate-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div class="p-4 border-b border-slate-700 bg-slate-800/50">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-semibold text-slate-300">Pengalaman (XP)</span>
+                <span id="xp-counter" class="text-sm font-bold text-yellow-400">0 / 2000</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-2.5">
+                <div id="xp-bar" class="bg-yellow-400 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <a href="index.html" class="w-full flex items-center gap-3 px-4 py-3 mb-4 rounded-lg text-left text-white bg-slate-800 hover:bg-slate-700 transition-colors border border-slate-600 shadow-md">
+                <i class="fas fa-arrow-left w-5 text-center text-rose-400"></i>
+                <span class="font-bold">Kembali ke Portal</span>
+            </a>
+
+            <div class="pt-2 pb-2 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Modul Pembelajaran</div>
+            <button onclick="loadModule('modul1')" id="nav-modul1" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-table text-blue-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M1: Medan & Rekod</span>
+            </button>
+            <button onclick="loadModule('modul2')" id="nav-modul2" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-key text-orange-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M2: Kekunci (PK & FK)</span>
+            </button>
+            <button onclick="loadModule('modul3')" id="nav-modul3" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-project-diagram text-green-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M3: Melakar ERD</span>
+            </button>
+            <button onclick="loadModule('modul4')" id="nav-modul4" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-random text-purple-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M4: Skema Hubungan</span>
+            </button>
+            <button onclick="loadModule('modul5')" id="nav-modul5" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-link text-indigo-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M5: Kebergantungan</span>
+            </button>
+            <button onclick="loadModule('modul6')" id="nav-modul6" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-layer-group text-teal-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M6: Penormalan 3NF</span>
+            </button>
+            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Penilaian</div>
+            <button onclick="loadModule('ujian')" id="nav-ujian" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-trophy w-5 text-center text-yellow-400"></i>
+                <span class="text-sm md:text-base">Ujian Akhir (Boss)</span>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 relative overflow-y-auto h-full">
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed top-5 right-5 z-50 transform transition-transform duration-300 translate-x-full bg-slate-800 border border-slate-600 px-4 py-3 md:px-6 md:py-4 rounded-lg shadow-xl flex items-center gap-3">
+            <i id="toast-icon" class="fas fa-check-circle text-green-400 text-lg md:text-xl"></i>
+            <div>
+                <h4 id="toast-title" class="font-bold text-white text-sm md:text-base">Berjaya!</h4>
+                <p id="toast-msg" class="text-xs md:text-sm text-slate-300">Jawapan anda tepat. +100 XP</p>
+            </div>
+        </div>
+
+        <div id="content-area" class="max-w-5xl mx-auto p-4 md:p-8 pb-24 md:pb-20">
+            <!-- Content gets injected here -->
+        </div>
+    </main>
+
+    <script>
+        // --- Mobile Menu Logic ---
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        if(mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleSidebar);
+        if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleSidebar);
+        if(overlay) overlay.addEventListener('click', toggleSidebar);
+
+        // --- State Management ---
+        let currentXP = 0;
+        const state = { 
+            m1_done: false, m2_done: false, m3_done: false, 
+            m4_done: false, m5_done: false, m6_done: false, ujian_done: false 
+        };
+
+        function addXP(amount) {
+            currentXP += amount;
+            if (currentXP > 2000) currentXP = 2000;
+            document.getElementById('xp-counter').innerText = `${currentXP} / 2000`;
+            document.getElementById('xp-bar').style.width = `${(currentXP / 2000) * 100}%`;
+            
+            const counter = document.getElementById('xp-counter');
+            counter.classList.add('scale-125', 'text-white');
+            setTimeout(() => counter.classList.remove('scale-125', 'text-white'), 300);
+        }
+
+        function showToast(title, msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            
+            if (type === 'success') {
+                icon.className = 'fas fa-check-circle text-green-400 text-xl';
+                toast.style.borderLeft = '4px solid #4ade80';
+            } else {
+                icon.className = 'fas fa-times-circle text-red-400 text-xl';
+                toast.style.borderLeft = '4px solid #f87171';
+            }
+
+            toast.classList.remove('translate-x-full');
+            setTimeout(() => { toast.classList.add('translate-x-full'); }, 3000);
+        }
+
+        function updateNavActive(moduleId) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const activeBtn = document.getElementById(`nav-${moduleId}`);
+            if(activeBtn) activeBtn.classList.add('active');
+        }
+
+        function loadModule(moduleId) {
+            // Close mobile sidebar when navigating
+            if (window.innerWidth < 768 && !sidebar.classList.contains('-translate-x-full')) {
+                toggleSidebar();
+            }
+
+            const container = document.getElementById('content-area');
+            updateNavActive(moduleId);
+            window.scrollTo(0, 0);
+            
+            let html = '';
+
+            switch (moduleId) {
+                case 'modul1':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-blue-500/20 text-blue-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">2.2.1</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Medan, Rekod & Jadual</h2>
+                            </div>
+                            
+                            <p class="text-slate-300 mb-6 text-sm md:text-lg">Sebuah pangkalan data menyimpan maklumat dalam bentuk struktur <strong>Jadual (Table)</strong>. Struktur ini terbahagi kepada dua elemen utama.</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8 md:mb-10">
+                                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 hover:-translate-y-1 transition-transform">
+                                    <div class="text-blue-400 font-bold mb-2 text-xl md:text-2xl"><i class="fas fa-columns mr-2"></i>Medan (Field)</div>
+                                    <p class="text-xs md:text-sm text-slate-400 mb-3">Lajur tegak (Column). Ia mewakili <strong>kategori atau atribut</strong> sesuatu entiti (contoh: Nama, Umur, Tingkatan).</p>
+                                </div>
+
+                                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 hover:-translate-y-1 transition-transform">
+                                    <div class="text-emerald-400 font-bold mb-2 text-xl md:text-2xl"><i class="fas fa-list-ul mr-2"></i>Rekod (Record)</div>
+                                    <p class="text-xs md:text-sm text-slate-400 mb-3">Baris mendatar (Row) atau dipanggil <strong>Tupel</strong>. Ia menyimpan <strong>sekumpulan maklumat lengkap</strong> tentang sesuatu entiti khusus.</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6 overflow-x-auto">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4"><i class="fas fa-dumbbell mr-2 text-blue-400"></i>Latihan Pengenalpastian</h3>
+                                <p class="text-sm text-slate-300 mb-4">Dalam jadual di bawah, baris "Ahmad, 16, 4 Sains" mewakili apa?</p>
+                                
+                                <table class="w-full text-left border-collapse mb-6 min-w-[300px]">
+                                    <thead class="bg-slate-700 text-white text-sm">
+                                        <tr>
+                                            <th class="p-3 border-b border-slate-600">Nama</th>
+                                            <th class="p-3 border-b border-slate-600">Umur</th>
+                                            <th class="p-3 border-b border-slate-600">Kelas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-slate-300 text-sm bg-slate-900">
+                                        <tr class="bg-blue-900/30 font-bold text-blue-200"><td class="p-3 border-b border-slate-700">Ahmad</td><td class="p-3 border-b border-slate-700">16</td><td class="p-3 border-b border-slate-700">4 Sains</td></tr>
+                                        <tr><td class="p-3 border-b border-slate-700">Siti</td><td class="p-3 border-b border-slate-700">16</td><td class="p-3 border-b border-slate-700">4 Sastera</td></tr>
+                                    </tbody>
+                                </table>
+                                
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <button onclick="checkM1('medan')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-6 py-3 transition-colors text-sm font-semibold flex-1">Medan (Field)</button>
+                                    <button onclick="checkM1('rekod')" class="bg-slate-700 hover:bg-blue-600 border border-blue-500 text-white rounded px-6 py-3 transition-colors text-sm font-semibold flex-1 shadow-[0_0_10px_rgba(59,130,246,0.3)]">Rekod (Tupel)</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul2':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-orange-500/20 text-orange-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">2.2.2</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Menentukan Kekunci</h2>
+                            </div>
+                            
+                            <p class="text-slate-300 mb-6 md:mb-8 text-sm md:text-lg">Kekunci sangat penting untuk menghubungkan jadual-jadual di dalam pangkalan data hubungan secara teratur.</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8">
+                                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6">
+                                    <h3 class="font-bold text-white text-base md:text-lg mb-3 border-b border-slate-700 pb-2"><i class="fas fa-key text-orange-400 mr-2"></i>Kunci Primer (PK)</h3>
+                                    <ul class="text-sm text-slate-300 space-y-3">
+                                        <li>Satu atribut atau gabungan atribut (komposit) yang mempunyai <strong>nilai unik</strong>.</li>
+                                        <li>Membezakan setiap rekod secara khusus (contoh: No. KP, ID Pelajar).</li>
+                                        <li>Nilainya <strong>tidak boleh dikosongkan (NOT NULL)</strong>.</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6">
+                                    <h3 class="font-bold text-white text-base md:text-lg mb-3 border-b border-slate-700 pb-2"><i class="fas fa-link text-emerald-400 mr-2"></i>Kunci Asing (FK)</h3>
+                                    <ul class="text-sm text-slate-300 space-y-3">
+                                        <li>Atribut dalam jadual semasa yang sebenarnya merupakan <strong>Kunci Primer di dalam jadual lain</strong>.</li>
+                                        <li>Bertindak sebagai penyambung untuk <strong>mewujudkan hubungan (relationship)</strong> antara dua jadual.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6 overflow-x-auto">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4">Latihan Pemilihan Kunci</h3>
+                                <p class="text-sm text-slate-300 mb-4">Anda ingin membina jadual ENTITI_PELAJAR. Antara atribut berikut, manakah yang <strong>PALING SESUAI</strong> untuk dijadikan Kunci Primer (PK)?</p>
+                                
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <button onclick="checkM2('A')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-4 py-3 transition-colors text-sm font-semibold flex-1">A) Nama Pelajar</button>
+                                    <button onclick="checkM2('B')" class="bg-slate-700 hover:bg-orange-600 border border-orange-500 text-white rounded px-4 py-3 transition-colors text-sm font-semibold flex-1 shadow-[0_0_10px_rgba(249,115,22,0.3)]">B) No. Kad Pengenalan</button>
+                                    <button onclick="checkM2('C')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-4 py-3 transition-colors text-sm font-semibold flex-1">C) Jantina</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul3':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-green-500/20 text-green-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">2.2.3</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Melakar ERD</h2>
+                            </div>
+                            
+                            <p class="text-slate-300 mb-6 md:mb-8 text-sm md:text-lg">Gambar Rajah Perhubungan Entiti (ERD) ialah pemodelan data secara bergrafik yang terdiri daripada Entiti, Atribut, Hubungan, dan Kekardinalan.</p>
+
+                            <div class="bg-slate-800 p-5 md:p-6 rounded-xl border border-slate-700 mb-8 overflow-hidden">
+                                <h3 class="font-bold text-white mb-4">Mengenali Kekardinalan Hubungan</h3>
+                                <div class="flex flex-col items-center justify-center bg-slate-900 rounded-xl p-4 md:p-8 relative border border-slate-700 shadow-inner overflow-x-auto min-h-[150px]">
+                                    <div class="flex items-center w-full justify-center min-w-[280px]">
+                                        <!-- Entity 1 -->
+                                        <div class="w-20 md:w-28 h-12 md:h-16 bg-slate-800 border-2 border-blue-400 rounded flex items-center justify-center font-bold text-white shadow-sm z-10 text-xs md:text-base">Guru</div>
+
+                                        <!-- Line -->
+                                        <div class="flex-1 max-w-[150px] md:max-w-[200px] flex items-center relative mx-[-4px] md:mx-[-10px]">
+                                            <div class="h-1 bg-slate-500 w-full"></div>
+                                            <span class="absolute -top-5 md:-top-6 left-2 font-bold text-sm md:text-lg text-white">1</span>
+                                            
+                                            <div class="w-10 h-10 md:w-16 md:h-16 border-2 border-emerald-400 bg-slate-800 rotate-45 flex items-center justify-center flex-shrink-0 z-10 mx-[-5px]">
+                                                <span class="-rotate-45 font-semibold text-[8px] md:text-xs text-white">Ajar</span>
+                                            </div>
+
+                                            <div class="h-1 bg-slate-500 w-full"></div>
+                                            <span class="absolute -top-5 md:-top-6 right-2 font-bold text-sm md:text-lg text-white">M</span>
+                                        </div>
+
+                                        <!-- Entity 2 -->
+                                        <div class="w-20 md:w-28 h-12 md:h-16 bg-slate-800 border-2 border-blue-400 rounded flex items-center justify-center font-bold text-white shadow-sm z-10 text-xs md:text-base">Kelas</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4">Latihan Kekardinalan</h3>
+                                <p class="text-sm text-slate-300 mb-4">Berdasarkan rajah ERD di atas, apakah kekardinalan bagi hubungan Guru dan Kelas tersebut?</p>
+                                
+                                <div class="flex flex-wrap gap-2 md:gap-3">
+                                    <button onclick="checkM3('1to1')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-6 py-3 transition-colors text-sm font-semibold flex-1">Satu ke Satu (1:1)</button>
+                                    <button onclick="checkM3('1toM')" class="bg-slate-700 hover:bg-green-600 border border-green-500 text-white rounded px-6 py-3 transition-colors text-sm font-semibold flex-1 shadow-[0_0_10px_rgba(16,185,129,0.3)]">Satu ke Banyak (1:M)</button>
+                                    <button onclick="checkM3('MtoN')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-6 py-3 transition-colors text-sm font-semibold flex-1">Banyak ke Banyak (M:N)</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul4':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-purple-500/20 text-purple-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">2.2.4</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">ERD ke Skema Hubungan</h2>
+                            </div>
+                            
+                            <p class="text-slate-300 mb-6 md:mb-8 text-sm md:text-lg">ERD yang dilukis perlu diterjemahkan ke dalam bentuk jadual teks yang dipanggil <strong>Skema Hubungan</strong>.</p>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden mb-8">
+                                <div class="bg-slate-700/50 p-4 border-b border-slate-700">
+                                    <h3 class="font-bold text-white text-sm md:text-base">Peraturan Hubungan 1:M</h3>
+                                </div>
+                                <div class="p-4 md:p-6 text-slate-300 text-sm">
+                                    <p class="mb-4">Semasa menukar ERD (1:M), Kunci Primer (PK) daripada entiti yang mempunyai kardinaliti <strong>'Satu (1)'</strong> mestilah dibawa masuk ke dalam entiti yang mempunyai kardinaliti <strong>'Banyak (M)'</strong> untuk dijadikan <strong>Kunci Asing (FK)</strong>.</p>
+                                    
+                                    <div class="bg-slate-900 rounded p-4 code-font text-xs md:text-sm border border-slate-700">
+                                        <p class="text-blue-300">GURU (<u class="text-white font-bold">ID_Guru</u>, NamaGuru)</p>
+                                        <p class="text-blue-300 mt-2">PELAJAR (<u class="text-white font-bold">ID_Pelajar</u>, NamaPelajar, <span class="border-b border-dashed border-white">ID_Guru</span>)</p>
+                                    </div>
+                                    <p class="text-xs text-slate-400 mt-2">* <u>Garis bawah penuh</u> melambangkan Kunci Primer. <span class="border-b border-dashed">Garis putus-putus</span> melambangkan Kunci Asing.</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4">Latihan Praktikal</h3>
+                                <p class="text-sm text-slate-300 mb-4">Jika <strong>1 Kelas</strong> mempunyai <strong>Banyak (M) Murid</strong>, bagaimanakah rupa Skema Hubungan bagi jadual Murid yang paling tepat?</p>
+                                
+                                <div class="flex flex-col gap-3">
+                                    <button onclick="checkM4('A')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-4 py-4 transition-colors text-sm md:text-base text-left code-font">A) MURID (<u>ID_Murid</u>, NamaMurid)</button>
+                                    <button onclick="checkM4('B')" class="bg-slate-700 hover:bg-purple-600 border border-purple-500 text-white rounded px-4 py-4 transition-colors text-sm md:text-base text-left code-font shadow-[0_0_10px_rgba(168,85,247,0.3)]">B) MURID (<u>ID_Murid</u>, NamaMurid, <span class="border-b border-dashed">ID_Kelas</span>)</button>
+                                    <button onclick="checkM4('C')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-4 py-4 transition-colors text-sm md:text-base text-left code-font">C) MURID (<u>ID_Murid</u>, NamaMurid, <u>ID_Kelas</u>)</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul5':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-indigo-500/20 text-indigo-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">2.2.5</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Kebergantungan Fungsi</h2>
+                            </div>
+                            
+                            <p class="text-slate-300 mb-6 md:mb-8 text-sm md:text-lg">Untuk memulakan proses penormalan, kita perlu mengkaji bagaimana setiap atribut bergantung kepada atribut yang lain.</p>
+
+                            <div class="space-y-4 md:space-y-6 mb-8 md:mb-10">
+                                <!-- Sepenuh -->
+                                <div class="bg-slate-800 p-4 md:p-5 rounded-xl border border-slate-700">
+                                    <h3 class="text-lg font-bold text-white mb-2 text-emerald-400">1. Kebergantungan Fungsi Sepenuh</h3>
+                                    <p class="text-slate-400 text-sm">Berlaku apabila atribut bukan kunci bergantung sepenuhnya kepada <strong>KESEMUA</strong> atribut Kunci Primer (yang berbentuk kunci komposit).</p>
+                                    <div class="mt-2 bg-slate-900 p-2 rounded text-xs code-font text-slate-300 border border-slate-700">
+                                        <u>NoKP</u>, <u>KodSubjek</u> &rarr; Gred
+                                    </div>
+                                </div>
+
+                                <!-- Separa -->
+                                <div class="bg-slate-800 p-4 md:p-5 rounded-xl border border-slate-700">
+                                    <h3 class="text-lg font-bold text-white mb-2 text-amber-400">2. Kebergantungan Fungsi Separa</h3>
+                                    <p class="text-slate-400 text-sm">Berlaku jika atribut bukan kunci hanya bergantung kepada <strong>SEBAHAGIAN</strong> daripada Kunci Primer (komposit).</p>
+                                    <div class="mt-2 bg-slate-900 p-2 rounded text-xs code-font text-slate-300 border border-slate-700">
+                                        <u>NoKP</u>, <u>KodSubjek</u> &rarr; NamaPelajar<br>
+                                        <span class="text-slate-500">// (NamaPelajar sebenarnya cukup bergantung pada NoKP sahaja)</span>
+                                    </div>
+                                </div>
+
+                                <!-- Transitif -->
+                                <div class="bg-slate-800 p-4 md:p-5 rounded-xl border border-slate-700">
+                                    <h3 class="text-lg font-bold text-white mb-2 text-rose-400">3. Kebergantungan Fungsi Transitif</h3>
+                                    <p class="text-slate-400 text-sm">Berlaku apabila atribut bukan kunci bergantung kepada atribut <strong>BUKAN KUNCI</strong> yang lain secara rantaian.</p>
+                                    <div class="mt-2 bg-slate-900 p-2 rounded text-xs code-font text-slate-300 border border-slate-700">
+                                        <u>NoKP</u> &rarr; KodKelas &rarr; NamaKelas<br>
+                                        <span class="text-slate-500">// (NamaKelas bergantung pada KodKelas yang BUKAN Kunci Primer)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4">Uji Minda</h3>
+                                <p class="text-sm text-slate-300 mb-4">Jika A (Kunci Primer) menentukan B, dan B (Bukan kunci) menentukan C, apakah jenis kebergantungan fungsi bagi C?</p>
+                                
+                                <div class="flex flex-wrap gap-2 md:gap-3">
+                                    <button onclick="checkM5('sepenuh')" class="flex-1 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-4 py-3 transition-colors font-semibold">Sepenuh</button>
+                                    <button onclick="checkM5('separa')" class="flex-1 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-4 py-3 transition-colors font-semibold">Separa</button>
+                                    <button onclick="checkM5('transitif')" class="flex-1 bg-slate-700 hover:bg-indigo-600 border border-indigo-500 text-white rounded px-4 py-3 transition-colors font-semibold shadow-[0_0_10px_rgba(99,102,241,0.3)]">Transitif</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul6':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-teal-500/20 text-teal-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">2.2.6</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Proses Penormalan (3NF)</h2>
+                            </div>
+                            
+                            <p class="text-slate-300 mb-6 md:mb-8 text-sm md:text-lg">Penormalan (Normalization) ialah proses memecahkan jadual kompleks kepada jadual-jadual kecil untuk membuang kelewahan data dan anomali.</p>
+
+                            <div class="grid grid-cols-1 gap-4 md:gap-6 mb-8">
+                                <div class="bg-slate-800 border border-slate-700 p-4 md:p-5 rounded-xl flex items-center gap-4 md:gap-6">
+                                    <div class="text-2xl md:text-3xl font-black text-blue-400 w-16 text-center tracking-tighter">1NF</div>
+                                    <div>
+                                        <h3 class="font-bold text-white text-base md:text-lg">Bentuk Normal Pertama (1NF)</h3>
+                                        <p class="text-sm text-slate-400">Menghapuskan <strong>kumpulan berulang (repeating groups)</strong> supaya jadual sekata (atomik).</p>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-800 border border-slate-700 p-4 md:p-5 rounded-xl flex items-center gap-4 md:gap-6">
+                                    <div class="text-2xl md:text-3xl font-black text-amber-400 w-16 text-center tracking-tighter">2NF</div>
+                                    <div>
+                                        <h3 class="font-bold text-white text-base md:text-lg">Bentuk Normal Kedua (2NF)</h3>
+                                        <p class="text-sm text-slate-400">Berada dalam 1NF. Kenal pasti dan pecahkan jadual untuk menghapuskan <strong>Kebergantungan Fungsi Separa</strong>.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-800 border border-slate-700 p-4 md:p-5 rounded-xl flex items-center gap-4 md:gap-6">
+                                    <div class="text-2xl md:text-3xl font-black text-emerald-400 w-16 text-center tracking-tighter">3NF</div>
+                                    <div>
+                                        <h3 class="font-bold text-white text-base md:text-lg">Bentuk Normal Ketiga (3NF)</h3>
+                                        <p class="text-sm text-slate-400">Berada dalam 2NF. Pecahkan lagi jadual untuk menghapuskan <strong>Kebergantungan Fungsi Transitif</strong>.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4">Latihan Kefahaman</h3>
+                                <p class="text-sm text-slate-300 mb-4">Dalam usaha untuk mencapai tahap pangkalan data yang stabil (3NF), ralat (kebergantungan) apakah yang WAJIB dihapuskan pada tahap akhir?</p>
+                                
+                                <div class="flex flex-col md:flex-row gap-3">
+                                    <select id="m6-q1" class="bg-slate-700 text-white text-sm rounded border border-slate-600 focus:border-teal-500 p-3 outline-none w-full md:w-auto">
+                                        <option value="">-- Pilih Jawapan --</option>
+                                        <option value="A">Kumpulan Berulang</option>
+                                        <option value="B">Kebergantungan Fungsi Separa</option>
+                                        <option value="C">Kebergantungan Fungsi Transitif</option>
+                                    </select>
+                                    <button onclick="checkM6()" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 md:py-2 rounded-lg font-semibold transition-colors flex-shrink-0 text-sm md:text-base">Semak</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'ujian':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-6">
+                                <span class="bg-yellow-500/20 text-yellow-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold"><i class="fas fa-trophy mr-2"></i>BOSS</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white">Ujian Penilaian Akhir</h2>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-5 md:p-8 shadow-2xl relative overflow-hidden">
+                                <div class="relative z-10">
+                                    <h3 class="text-lg md:text-xl font-bold text-white mb-6 border-b border-slate-700 pb-4">Jawab 15 soalan berikut dengan tepat untuk melengkapkan Topik 2.2.</h3>
+                                    
+                                    <div class="space-y-8 md:space-y-10">
+                                        <!-- Q1 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">1. Dalam jadual pangkalan data hubungan, apakah yang dimaksudkan dengan "Medan" (Field)?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq1" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Baris mendatar penyimpan maklumat lengkap</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq1" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Lajur menegak yang mewakili kategori/atribut</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q2 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">2. "Rekod" (Record) dalam pangkalan data hubungan juga lebih dikenali sebagai...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq2" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Entiti</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq2" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Tupel (Baris data)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q3 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">3. Apakah peranan utama "Kunci Primer" (Primary Key)?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq3" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Mengenal pasti setiap rekod di dalam jadual secara unik</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq3" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menghubungkan jadual dengan jadual yang lain</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q4 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">4. "Kunci Asing" (Foreign Key) sangat penting kerana ia berfungsi untuk...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq4" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menjadi kunci utama yang baharu</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq4" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Mewujudkan hubungan (relationship) antara dua jadual</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q5 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">5. Akronim ERD bermaksud...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq5" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Entity Relationship Diagram</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq5" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Entity Record Database</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q6 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">6. Semasa menukar ERD bersyarat 1:M kepada Skema Hubungan, Kunci Asing (FK) diletakkan di jadual mana?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq6" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Di sebelah entiti "Satu (1)"</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq6" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Di sebelah entiti "Banyak (M)"</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q7 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">7. Apakah yang dimaksudkan dengan "Kunci Komposit" (Composite Key)?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq7" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Gabungan dua atau lebih atribut untuk membentuk satu kunci unik</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq7" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kunci asing yang dihantar ke jadual ketiga</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q8 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">8. "Kebergantungan Fungsi Sepenuh" berlaku apabila...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq8" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Atribut bergantung kepada KESEMUA atribut kunci primer komposit</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq8" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Atribut bergantung kepada satu sahaja kunci</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q9 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">9. "Kebergantungan Fungsi Separa" perlu dihapuskan untuk mencapai jadual di tahap...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq9" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">1NF</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq9" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">2NF</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q10 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">10. Jika NamaKelas bergantung kepada KodKelas, dan KodKelas BUKAN Kunci Primer, ia adalah...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq10" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kebergantungan Fungsi Transitif</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq10" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kebergantungan Fungsi Sepenuh</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q11 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">11. Syarat utama Bentuk Normal Pertama (1NF) adalah...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq11" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menghapuskan kumpulan data berulang (repeating groups)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq11" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menghapuskan kunci asing</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q12 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">12. Sebuah jadual diiktiraf 3NF apabila ia sudah berada dalam 2NF, dan...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq12" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Tiada kebergantungan separa</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq12" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Tiada kebergantungan transitif</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q13 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">13. Standard reka bentuk Pangkalan Data yang paling stabil untuk dibangunkan di SQL ialah tahap...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq13" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">UNF (Unnormalized)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq13" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">3NF (Third Normal Form)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q14 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">14. Di dalam Skema Hubungan, atribut Kunci Asing ditandakan dengan simbol...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq14" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Garis lurus penuh</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq14" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Garis putus-putus (Dashed line)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q15 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">15. Matlamat utama melaksanakan proses penormalan (Normalization) adalah untuk?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq15" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menghapuskan kelewahan data (pengulangan) bagi memastikan integriti terpelihara</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq15" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menjadikan pangkalan data berwarna warni</span></label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button onclick="checkUjian()" class="w-full mt-10 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-orange-900/20 transform transition hover:-translate-y-1">Hantar Jawapan</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // --- Evaluators ---
+        function checkM1(val) {
+            if (val === 'rekod') {
+                if(!state.m1_done) { addXP(100); state.m1_done = true; }
+                showToast("Tepat!", "Ia merupakan satu barisan lengkap (Tupel) yang menerangkan satu maklumat khusus.");
+            } else {
+                showToast("Salah", "Medan (Field) merujuk pada lajur atas seperti Nama/Umur. Sila cuba lagi.", "error");
+            }
+        }
+
+        function checkM2(val) {
+            if (val === 'B') {
+                if(!state.m2_done) { addXP(150); state.m2_done = true; }
+                showToast("Tepat Sekali!", "No. Kad Pengenalan adalah unik dan tidak dikongsi oleh orang lain menjadikannya Kunci Primer yang paling ideal.");
+            } else {
+                showToast("Salah", "Nama atau jantina boleh dikongsi oleh lebih dari seorang pelajar, ia tidak unik.", "error");
+            }
+        }
+
+        function checkM3(val) {
+            if (val === '1toM') {
+                if(!state.m3_done) { addXP(150); state.m3_done = true; }
+                showToast("Pandai!", "Seorang Guru (1) mengajar banyak (M) Kelas. Kekardinalan 1:M.");
+            } else {
+                showToast("Kurang Tepat", "Perhatikan simbol pada penghujung garisan (1 dan M).", "error");
+            }
+        }
+
+        function checkM4(val) {
+            if (val === 'B') {
+                if(!state.m4_done) { addXP(100); state.m4_done = true; }
+                showToast("Penyelesaian Sempurna!", "Kunci Asing (ID_Kelas) perlu ditambah ke dalam entiti yang mempunyai simbol M (Banyak).");
+            } else {
+                showToast("Tersasar", "Semak semula peraturan 1:M. Kunci asing (Garis putus) mesti berada di dalam entiti M.", "error");
+            }
+        }
+
+        function checkM5(val) {
+            if (val === 'transitif') {
+                if(!state.m5_done) { addXP(100); state.m5_done = true; }
+                showToast("Hebat!", "Atribut bukan kunci yang bergantung kepada atribut bukan kunci dipanggil Transitif.");
+            } else {
+                showToast("Salah", "Fokus pada pergantungan antara B dan C (dua-dua bukan kunci primer).", "error");
+            }
+        }
+
+        function checkM6() {
+            const val = document.getElementById('m6-q1').value;
+            if (val === 'C') {
+                if(!state.m6_done) { addXP(100); state.m6_done = true; }
+                showToast("Sempurna!", "3NF adalah peringkat membuang Kebergantungan Fungsi Transitif.");
+            } else if(val === "") {
+                showToast("Sila Pilih", "Pilih jawapan dari senarai.", "error");
+            } else {
+                showToast("Tidak Tepat", "Sila baca semula peraturan 2NF dan 3NF di atas.", "error");
+            }
+        }
+
+        function checkUjian() {
+            const answers = { uq1: 'B', uq2: 'B', uq3: 'A', uq4: 'B', uq5: 'A', uq6: 'B', uq7: 'A', uq8: 'A', uq9: 'B', uq10: 'A', uq11: 'A', uq12: 'B', uq13: 'B', uq14: 'B', uq15: 'A' };
+            let allAnswered = true, allCorrect = true;
+
+            for (let i = 1; i <= 15; i++) {
+                const q = document.querySelector(`input[name="uq${i}"]:checked`);
+                if (!q) { allAnswered = false; break; }
+                if (q.value !== answers[`uq${i}`]) { allCorrect = false; }
+            }
+
+            if (!allAnswered) {
+                showToast("Perhatian", "Sila jawab kesemua 15 soalan.", "error"); return;
+            }
+
+            if (allCorrect) {
+                if(!state.ujian_done) { addXP(1000); state.ujian_done = true; }
+                document.getElementById('content-area').innerHTML = `
+                    <div class="animate-fade-in text-center pt-10 md:pt-20 pb-20">
+                        <i class="fas fa-medal text-7xl md:text-9xl text-orange-400 mb-8 drop-shadow-[0_0_30px_rgba(249,115,22,0.5)]"></i>
+                        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Tahniah! Anda Lulus Cemerlang.</h1>
+                        <p class="text-sm md:text-xl text-slate-300 max-w-2xl mx-auto px-4">Anda telah menguasai asas Reka Bentuk Pangkalan Data Hubungan dan Penormalan!</p>
+                        <p class="mt-8 text-xl md:text-2xl font-bold text-orange-400">Total XP: ${currentXP}</p>
+                        <div class="mt-12">
+                            <a href="index.html" class="inline-block bg-orange-600 hover:bg-orange-500 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl font-bold text-sm md:text-lg transition-colors shadow-lg shadow-orange-900/50">
+                                <i class="fas fa-home mr-2"></i> Kembali ke Portal Utama
+                            </a>
+                        </div>
+                    </div>
+                `;
+                window.scrollTo(0, 0);
+            } else {
+                showToast("Gagal", "Terdapat jawapan yang salah. Sila cuba lagi.", "error");
+            }
+        }
+
+        window.onload = () => { loadModule('modul1'); };
+    </script>
+</body>
+</html>

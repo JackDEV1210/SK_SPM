@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akademi Pengekodan: Pembangunan Pangkalan Data Hubungan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .nav-item.active {
+            background-color: #f97316; /* Orange 500 */
+            color: white;
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen overflow-hidden selection:bg-orange-500 selection:text-white bg-slate-900">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center z-30">
+        <h1 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fas fa-database text-orange-500"></i> Akademi Kod (2.3)
+        </h1>
+        <button id="mobile-menu-btn" class="text-slate-300 hover:text-white focus:outline-none">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/80 z-40 hidden md:hidden backdrop-blur-sm transition-opacity"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 z-50 w-72 bg-slate-800 border-r border-slate-700 flex flex-col h-full shadow-2xl md:shadow-none">
+        <div class="p-6 border-b border-slate-700 hidden md:block">
+            <h1 class="text-xl font-bold text-white flex items-center gap-3">
+                <i class="fas fa-database text-orange-500"></i>
+                Akademi Kod
+            </h1>
+            <p class="text-xs text-slate-400 mt-2">Sains Komputer - Topik 2.3</p>
+        </div>
+        
+        <div class="p-4 md:hidden flex justify-between items-center border-b border-slate-700">
+            <span class="text-white font-bold text-lg">Menu Navigasi</span>
+            <button id="close-sidebar-btn" class="text-slate-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div class="p-4 border-b border-slate-700 bg-slate-800/50">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-semibold text-slate-300">Pengalaman (XP)</span>
+                <span id="xp-counter" class="text-sm font-bold text-yellow-400">0 / 2000</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-2.5">
+                <div id="xp-bar" class="bg-yellow-400 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <a href="index.html" class="w-full flex items-center gap-3 px-4 py-3 mb-4 rounded-lg text-left text-white bg-slate-800 hover:bg-slate-700 transition-colors border border-slate-600 shadow-md">
+                <i class="fas fa-arrow-left w-5 text-center text-rose-400"></i>
+                <span class="font-bold">Kembali ke Portal</span>
+            </a>
+
+            <div class="pt-2 pb-2 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Modul Pembelajaran</div>
+            <button onclick="loadModule('modul1')" id="nav-modul1" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-table text-blue-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M1: Bina Jadual</span>
+            </button>
+            <button onclick="loadModule('modul2')" id="nav-modul2" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="far fa-window-maximize text-emerald-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M2: Cipta Borang</span>
+            </button>
+            <button onclick="loadModule('modul3')" id="nav-modul3" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-keyboard text-amber-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M3: Kemasukan Data</span>
+            </button>
+            <button onclick="loadModule('modul4')" id="nav-modul4" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-search text-purple-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M4: Membina Query</span>
+            </button>
+            <button onclick="loadModule('modul5')" id="nav-modul5" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-print text-rose-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M5: Menjana Laporan</span>
+            </button>
+            <button onclick="loadModule('modul6')" id="nav-modul6" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-bars text-teal-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M6: Menu Makro</span>
+            </button>
+            <button onclick="loadModule('modul7')" id="nav-modul7" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-book text-indigo-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M7: Dokumentasi</span>
+            </button>
+            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Penilaian</div>
+            <button onclick="loadModule('ujian')" id="nav-ujian" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-trophy w-5 text-center text-yellow-400"></i>
+                <span class="text-sm md:text-base">Ujian Akhir (Boss)</span>
+            </button>
+        </nav>
+        
+        <div class="p-4 border-t border-slate-700 bg-slate-900 text-center">
+            <span class="text-xs font-bold text-slate-500"><i class="fas fa-clock mr-1"></i> Masa Pembelajaran: 30 Jam</span>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 relative overflow-y-auto h-full">
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed top-5 right-5 z-50 transform transition-transform duration-300 translate-x-full bg-slate-800 border border-slate-600 px-4 py-3 md:px-6 md:py-4 rounded-lg shadow-xl flex items-center gap-3">
+            <i id="toast-icon" class="fas fa-check-circle text-green-400 text-lg md:text-xl"></i>
+            <div>
+                <h4 id="toast-title" class="font-bold text-white text-sm md:text-base">Berjaya!</h4>
+                <p id="toast-msg" class="text-xs md:text-sm text-slate-300">Jawapan anda tepat.</p>
+            </div>
+        </div>
+
+        <div id="content-area" class="max-w-5xl mx-auto p-4 md:p-8 pb-24 md:pb-20">
+            <!-- Content gets injected here -->
+        </div>
+    </main>
+
+    <script>
+        // --- Mobile Menu Logic ---
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        if(mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleSidebar);
+        if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleSidebar);
+        if(overlay) overlay.addEventListener('click', toggleSidebar);
+
+        // --- State Management ---
+        let currentXP = 0;
+        const state = { 
+            m1_done: false, m2_done: false, m3_done: false, 
+            m4_done: false, m5_done: false, m6_done: false, m7_done: false, ujian_done: false 
+        };
+
+        function addXP(amount) {
+            currentXP += amount;
+            if (currentXP > 2000) currentXP = 2000;
+            document.getElementById('xp-counter').innerText = `${currentXP} / 2000`;
+            document.getElementById('xp-bar').style.width = `${(currentXP / 2000) * 100}%`;
+            
+            const counter = document.getElementById('xp-counter');
+            counter.classList.add('scale-125', 'text-white');
+            setTimeout(() => counter.classList.remove('scale-125', 'text-white'), 300);
+        }
+
+        function showToast(title, msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            
+            if (type === 'success') {
+                icon.className = 'fas fa-check-circle text-green-400 text-xl';
+                toast.style.borderLeft = '4px solid #4ade80';
+            } else {
+                icon.className = 'fas fa-times-circle text-red-400 text-xl';
+                toast.style.borderLeft = '4px solid #f87171';
+            }
+
+            toast.classList.remove('translate-x-full');
+            setTimeout(() => { toast.classList.add('translate-x-full'); }, 3000);
+        }
+
+        function updateNavActive(moduleId) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const activeBtn = document.getElementById(`nav-${moduleId}`);
+            if(activeBtn) activeBtn.classList.add('active');
+        }
+
+        function loadModule(moduleId) {
+            // Close mobile sidebar when navigating
+            if (window.innerWidth < 768 && !sidebar.classList.contains('-translate-x-full')) {
+                toggleSidebar();
+            }
+
+            const container = document.getElementById('content-area');
+            updateNavActive(moduleId);
+            window.scrollTo(0, 0);
+            
+            let html = '';
+
+            switch (moduleId) {
+                case 'modul1':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-blue-500/20 text-blue-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">2.3.1</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Membina Jadual (Table)</h2>
+                            </div>
+                            
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-8 mb-8 text-slate-300 text-sm md:text-base leading-relaxed shadow-lg">
+                                <p class="mb-4">Selepas Skema Hubungan 3NF dihasilkan, fasa amali bermula. Kita akan menggunakan Perisian Sistem Pengurusan Pangkalan Data Hubungan (RDBMS) seperti <strong>Microsoft Access</strong> atau <strong>MySQL</strong> untuk membina pangkalan data sebenar secara fizikal.</p>
+                                <p class="mb-4">Langkah paling pertama yang wajib dibuat ialah <strong>Membina Jadual (Table)</strong> berdasarkan ERD dan skema yang telah dirancang. Tanpa jadual, tiada tempat untuk menyimpan rekod.</p>
+                                
+                                <h3 class="font-bold text-white text-lg mt-8 mb-4 border-b border-slate-700 pb-2"><i class="fas fa-sliders-h text-blue-400 mr-2"></i>Tetapan Jenis Data (Data Types)</h3>
+                                <p class="mb-4">Semasa mencipta medan (field), komputer perlu tahu jenis data yang sesuai supaya kapasiti memori dapat dioptimumkan dan pengiraan (jika ada) dapat dilakukan.</p>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                                        <h4 class="text-blue-400 font-bold mb-1">Short Text / Text</h4>
+                                        <p class="text-xs text-slate-400">Untuk teks biasa, gabungan huruf & nombor (Alfanumerik) yang tidak memerlukan pengiraan matematik. (Cth: Nama, No KP, Alamat, No Telefon).</p>
+                                    </div>
+                                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                                        <h4 class="text-amber-400 font-bold mb-1">Number / Integer</h4>
+                                        <p class="text-xs text-slate-400">Hanya untuk nombor. Digunakan terutamanya jika nilai itu akan ditambah/didarab kelak. (Cth: Umur, Kuantiti Stok).</p>
+                                    </div>
+                                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                                        <h4 class="text-emerald-400 font-bold mb-1">Date/Time</h4>
+                                        <p class="text-xs text-slate-400">Menyimpan format tarikh atau masa yang sah. (Cth: Tarikh Lahir, Waktu Log Masuk).</p>
+                                    </div>
+                                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                                        <h4 class="text-rose-400 font-bold mb-1">AutoNumber / Auto Increment</h4>
+                                        <p class="text-xs text-slate-400">Sistem mencipta nombor unik secara berturutan secara automatik tanpa perlu ditaip. Sangat sesuai dijadikan Kunci Primer (Primary Key).</p>
+                                    </div>
+                                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 md:col-span-2">
+                                        <h4 class="text-purple-400 font-bold mb-1">Currency / Decimal</h4>
+                                        <p class="text-xs text-slate-400">Menyimpan nilai mata wang yang mempunyai titik perpuluhan yang tepat. (Cth: RM 50.50, Harga Barang).</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6 shadow-lg">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4"><i class="fas fa-tasks text-blue-400 mr-2"></i>Uji Kefahaman</h3>
+                                <p class="text-sm text-slate-300 mb-4">Anda sedang membina jadual PELANGGAN. Anda mempunyai satu medan bernama <strong>"No_Telefon_Bimbit"</strong>. Apakah jenis data yang <strong>PALING TEPAT</strong> untuk medan ini di dalam Microsoft Access?</p>
+                                
+                                <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                                    <button onclick="checkM1('Number')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-6 py-3 transition-colors text-sm font-semibold flex-1">Number</button>
+                                    <button onclick="checkM1('Short Text')" class="bg-slate-700 hover:bg-blue-600 border border-blue-500 text-white rounded px-6 py-3 transition-colors text-sm font-semibold flex-1 shadow-[0_0_10px_rgba(59,130,246,0.3)]">Short Text</button>
+                                    <button onclick="checkM1('AutoNumber')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-6 py-3 transition-colors text-sm font-semibold flex-1">AutoNumber</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul2':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-emerald-500/20 text-emerald-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">2.3.2</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Mencipta Borang (Form)</h2>
+                            </div>
+                            
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-8 mb-8 text-slate-300 text-sm md:text-base leading-relaxed shadow-lg">
+                                <p class="mb-4">Walaupun data disimpan di dalam jadual (Table), pengguna biasa (seperti kerani atau pelanggan) <strong>tidak patut dibenarkan</strong> membuka dan menaip terus ke dalam paparan Jadual secara langsung.</p>
+                                <p class="mb-6">Ini kerana paparan Jadual sukar dibaca jika datanya terlalu banyak, tidak mesra pengguna, dan mudah berlakunya ralat tidak sengaja (seperti terpadam rekod orang lain). Oleh itu, kita membina <strong>Borang (Form)</strong>.</p>
+                                
+                                <div class="bg-slate-900 border-l-4 border-emerald-500 p-5 rounded text-sm mb-8">
+                                    <h3 class="text-white font-bold mb-2">Mengapa Guna Borang (Form)?</h3>
+                                    <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                                        <li>Menyediakan Antara Muka Bergrafik (GUI) yang cantik, moden dan kemas.</li>
+                                        <li>Memaparkan hanya satu rekod sahaja pada satu-satu masa (fokus).</li>
+                                        <li>Memudahkan kawalan butang tindakan (Simpan, Padam, Seterusnya).</li>
+                                        <li>Melindungi struktur asal pangkalan data daripada diakses secara terbuka.</li>
+                                    </ul>
+                                </div>
+
+                                <h3 class="font-bold text-white text-lg mb-4 border-b border-slate-700 pb-2"><i class="fas fa-layer-group text-emerald-400 mr-2"></i>Komponen Utama Paparan Borang</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                                        <h4 class="text-emerald-400 font-bold mb-1">Form Header</h4>
+                                        <p class="text-xs text-slate-400">Bahagian atas sekali. Mengandungi Tajuk borang dan logo syarikat.</p>
+                                    </div>
+                                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                                        <h4 class="text-emerald-400 font-bold mb-1">Detail</h4>
+                                        <p class="text-xs text-slate-400">Kawasan tengah yang menempatkan kotak teks (text box), label, dan kotak kombo untuk input data.</p>
+                                    </div>
+                                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                                        <h4 class="text-emerald-400 font-bold mb-1">Form Footer</h4>
+                                        <p class="text-xs text-slate-400">Bahagian bawah. Sering digunakan untuk meletakkan butang-butang navigasi atau arahan kawalan.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6 shadow-lg">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4"><i class="fas fa-question-circle text-emerald-400 mr-2"></i>Uji Kefahaman</h3>
+                                <p class="text-sm text-slate-300 mb-4">Apakah perbezaan paling jelas antara memasukkan data terus ke dalam 'Table' berbanding menggunakan 'Form'?</p>
+                                
+                                <div class="flex flex-col gap-3 mt-4">
+                                    <button onclick="checkM2('A')" class="bg-slate-700 hover:bg-emerald-600 hover:border-emerald-500 border border-slate-600 text-white rounded px-4 py-4 transition-colors text-sm text-left shadow-sm">A) 'Form' menyimpan data secara berasingan tanpa kaitan dengan 'Table'.</button>
+                                    <button onclick="checkM2('B')" class="bg-slate-700 hover:bg-emerald-600 hover:border-emerald-500 border border-slate-600 text-white rounded px-4 py-4 transition-colors text-sm text-left shadow-sm font-semibold border-emerald-500/30">B) 'Form' menyajikan antaramuka (GUI) yang memfokuskan kepada paparan satu rekod pada satu masa demi kemudahan pengguna.</button>
+                                    <button onclick="checkM2('C')" class="bg-slate-700 hover:bg-emerald-600 hover:border-emerald-500 border border-slate-600 text-white rounded px-4 py-4 transition-colors text-sm text-left shadow-sm">C) Memasukkan data di 'Table' memerlukan sambungan internet manakala 'Form' tidak.</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul3':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-amber-500/20 text-amber-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">2.3.3</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Kemasukan Data & Validasi</h2>
+                            </div>
+                            
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-8 mb-8 text-slate-300 text-sm md:text-base leading-relaxed shadow-lg">
+                                <p class="mb-4">Apabila jadual dan borang telah tersedia, fasa seterusnya adalah <strong>Kemasukan Data</strong>. Proses ini membolehkan pengguna mula menaip maklumat untuk disimpan ke dalam sistem.</p>
+                                
+                                <p class="mb-6">Namun, manusia sering melakukan kesilapan. Bagaimana jika pengguna menaip "Dua Puluh" ke dalam ruangan Umur yang memerlukan nombor? Untuk mencegah sistem dari 'crash' dan memastikan integriti data terpelihara, kita mesti mewujudkan <strong>Peraturan Pengesahan (Validation)</strong>.</p>
+
+                                <h3 class="font-bold text-white text-lg mb-4 border-b border-slate-700 pb-2"><i class="fas fa-shield-check text-amber-400 mr-2"></i>Kaedah Pengesahan Data (Data Validation)</h3>
+                                
+                                <div class="space-y-4">
+                                    <div class="bg-slate-900 border-l-4 border-amber-500 p-4 rounded-lg flex flex-col md:flex-row gap-4 items-start">
+                                        <div class="w-full md:w-1/3 text-amber-300 font-bold">Validation Rule<br><span class="text-xs font-normal text-slate-500">(Peraturan Pengesahan)</span></div>
+                                        <div class="w-full md:w-2/3 text-sm text-slate-400">
+                                            Satu syarat logik yang disetkan pada ciri medan (field properties) untuk membataskan nilai yang boleh dimasukkan.<br>
+                                            <code class="bg-slate-800 text-amber-200 px-2 py-1 rounded mt-2 inline-block">Cth: >=0 And <=100</code>
+                                        </div>
+                                    </div>
+                                    <div class="bg-slate-900 border-l-4 border-amber-500 p-4 rounded-lg flex flex-col md:flex-row gap-4 items-start">
+                                        <div class="w-full md:w-1/3 text-amber-300 font-bold">Validation Text<br><span class="text-xs font-normal text-slate-500">(Teks Mesej Ralat)</span></div>
+                                        <div class="w-full md:w-2/3 text-sm text-slate-400">
+                                            Mesej pop-up amaran yang dipaparkan sekiranya pengguna melanggar Validation Rule yang telah ditetapkan di atas.<br>
+                                            <code class="bg-slate-800 text-amber-200 px-2 py-1 rounded mt-2 inline-block">Cth: "Markah mestilah di antara 0 hingga 100 sahaja!"</code>
+                                        </div>
+                                    </div>
+                                    <div class="bg-slate-900 border-l-4 border-amber-500 p-4 rounded-lg flex flex-col md:flex-row gap-4 items-start">
+                                        <div class="w-full md:w-1/3 text-amber-300 font-bold">Input Mask<br><span class="text-xs font-normal text-slate-500">(Topeng Input)</span></div>
+                                        <div class="w-full md:w-2/3 text-sm text-slate-400">
+                                            Memaksa pengguna memasukkan data mengikut corak (pattern) format yang spesifik bagi menyeragamkan data.<br>
+                                            <code class="bg-slate-800 text-amber-200 px-2 py-1 rounded mt-2 inline-block">Cth: 000000-00-0000 (Untuk Format No KP)</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6 shadow-lg">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4"><i class="fas fa-cogs text-amber-400 mr-2"></i>Uji Kefahaman</h3>
+                                <p class="text-sm text-slate-300 mb-4">Jika anda sedang mereka bentuk pangkalan data sekolah, di manakah (properties) anda harus menaip <code class="bg-slate-900 px-2 text-amber-300 rounded">"Sila pastikan umur yang ditaip melebihi 13 tahun."</code> supaya mesej itu keluar jika kemasukan data adalah salah?</p>
+                                
+                                <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                                    <button onclick="checkM3('rule')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-6 py-3 transition-colors text-sm font-semibold flex-1">Validation Rule</button>
+                                    <button onclick="checkM3('text')" class="bg-slate-700 hover:bg-amber-600 border border-amber-500 text-white rounded px-6 py-3 transition-colors text-sm font-semibold flex-1 shadow-[0_0_10px_rgba(245,158,11,0.3)]">Validation Text</button>
+                                    <button onclick="checkM3('mask')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-6 py-3 transition-colors text-sm font-semibold flex-1">Input Mask</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul4':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-purple-500/20 text-purple-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">2.3.4</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Membina Query (Carian)</h2>
+                            </div>
+                            
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-8 mb-8 text-slate-300 text-sm md:text-base leading-relaxed shadow-lg">
+                                <p class="mb-4">Apabila data telah dimasukkan, data tersebut tidak berguna jika kita tidak boleh mencari, menapis, dan mengekstraknya kembali. Di sinilah wujudnya keperluan <strong>Query (Pertanyaan/Carian)</strong>.</p>
+                                <p class="mb-6">Query membolehkan kita menyaring ribuan rekod dan <strong>hanya memaparkan rekod yang menepati kriteria</strong> (syarat) tertentu.</p>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl relative">
+                                        <div class="absolute top-0 right-0 bg-purple-600/30 text-purple-300 px-3 py-1 rounded-bl-lg text-xs font-bold border-b border-l border-purple-500/50">Situasi A</div>
+                                        <h3 class="font-bold text-white mb-2 mt-4">1 Jadual, > 1 Kriteria (AND/OR)</h3>
+                                        <p class="text-xs text-slate-400 mb-4">Mencari maklumat di dalam jadual yang sama tetapi mempunyai syarat berlapis.</p>
+                                        <p class="text-sm text-blue-300 bg-slate-800 p-2 rounded code-font">
+                                            <strong>Kriteria AND:</strong> Sebaris (Kiri-Kanan).<br>
+                                            Cth: Paparkan murid yang "Lelaki" <strong>DAN</strong> ahli "Kadet Polis". (Dua-dua syarat mesti betul).
+                                        </p>
+                                        <p class="text-sm text-emerald-300 bg-slate-800 p-2 rounded code-font mt-2">
+                                            <strong>Kriteria OR:</strong> Bawah-Atas (Row 'or').<br>
+                                            Cth: Paparkan murid dari "Kelas 5A" <strong>ATAU</strong> "Kelas 5B". (Salah satu betul pun tak apa).
+                                        </p>
+                                    </div>
+
+                                    <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl relative">
+                                        <div class="absolute top-0 right-0 bg-purple-600/30 text-purple-300 px-3 py-1 rounded-bl-lg text-xs font-bold border-b border-l border-purple-500/50">Situasi B</div>
+                                        <h3 class="font-bold text-white mb-2 mt-4">2 Jadual Berhubung (Join)</h3>
+                                        <p class="text-xs text-slate-400 mb-4">Menggabungkan data (menarik lajur) daripada dua jadual yang berbeza tetapi mempunyai <strong>Kunci Asing (Relationship)</strong> yang sah.</p>
+                                        <div class="bg-slate-800 p-3 rounded border border-slate-600">
+                                            <p class="text-xs text-slate-300 mb-2">Contoh paparan Query (Join):</p>
+                                            <ul class="text-xs text-purple-300 list-disc pl-4 space-y-1">
+                                                <li>Lajur: <strong>Nama_Murid</strong> (dari Jadual_Murid)</li>
+                                                <li>Lajur: <strong>Markah</strong> (dari Jadual_Murid)</li>
+                                                <li>Lajur: <strong>Nama_Guru</strong> (dari Jadual_Kelas)</li>
+                                                <li class="text-orange-400 mt-2 list-none font-bold">Syarat (Criteria): Markah > 80</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6 shadow-lg">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4"><i class="fas fa-search text-purple-400 mr-2"></i>Uji Kefahaman Query</h3>
+                                <p class="text-sm text-slate-300 mb-4">Di dalam Design View untuk Query MS Access, jika anda meletakkan kriteria <strong>"Ahmad"</strong> pada lajur Nama, dan meletakkan <strong>"> 50"</strong> pada lajur Markah <u>di baris (row) "Criteria" yang SAMA</u>, apakah hasilnya?</p>
+                                
+                                <div class="flex flex-col gap-3 mt-4">
+                                    <button onclick="checkM4('A')" class="bg-slate-700 hover:bg-slate-600 hover:border-slate-500 border border-slate-600 text-white rounded px-4 py-4 transition-colors text-sm text-left shadow-sm">A) Ia akan memaparkan semua orang yang bernama Ahmad, dan semua orang yang mendapat lebih 50 markah (OR).</button>
+                                    <button onclick="checkM4('B')" class="bg-slate-700 hover:bg-purple-600 hover:border-purple-500 border border-slate-600 text-white rounded px-4 py-4 transition-colors text-sm text-left shadow-sm font-semibold border-purple-500/30">B) Ia HANYA memaparkan rekod murid yang bernama Ahmad, yang juga MESTI mendapat markah lebih 50 (AND).</button>
+                                    <button onclick="checkM4('C')" class="bg-slate-700 hover:bg-slate-600 hover:border-slate-500 border border-slate-600 text-white rounded px-4 py-4 transition-colors text-sm text-left shadow-sm">C) Ia akan mencetak laporan terus ke mesin pencetak.</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul5':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-rose-500/20 text-rose-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">2.3.5</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Menjana Laporan (Report)</h2>
+                            </div>
+                            
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-8 mb-8 text-slate-300 text-sm md:text-base leading-relaxed shadow-lg">
+                                <p class="mb-4">Data yang telah ditapis dan dicari menggunakan Query tadi hanyalah paparan data mentah di skrin. Bagi tujuan rasmi syarikat, perbentangan, mahupun untuk dicetak pada kertas bersaiz A4, kita menggunakan <strong>Laporan (Report)</strong>.</p>
+                                
+                                <div class="bg-slate-900 border-l-4 border-rose-500 p-5 rounded text-sm mb-6 mt-6">
+                                    <h3 class="text-white font-bold mb-2">Fungsi Utama Laporan (Report):</h3>
+                                    <ul class="list-disc pl-5 space-y-2 text-slate-400">
+                                        <li><strong class="text-rose-300">Format Cetakan:</strong> Menyediakan data dalam susun atur format yang kemas untuk dibaca dan dicetak (ada header/footer muka surat).</li>
+                                        <li><strong class="text-rose-300">Pengumpulan (Grouping):</strong> Mengumpulkan dan menyusun rekod berdasarkan kategori tertentu (cth: Susun mengikut Kelas, kemudian Nama).</li>
+                                        <li><strong class="text-rose-300">Rumusan (Summary):</strong> Laporan membolehkan integrasi fungsi rumusan automatik secara kumulatif pada penghujung data seperti Jumlah (Sum), Purata (Avg), dan Kiraan (Count).</li>
+                                    </ul>
+                                </div>
+
+                                <p class="text-sm text-slate-400 italic bg-slate-700/30 p-3 rounded border border-slate-700 text-center">
+                                    <i class="fas fa-info-circle text-rose-400 mr-2"></i>Nota: Berbeza dengan Form (untuk pengguna masukkan data), Report direka <strong>hanya khusus untuk bacaan (Read-Only)</strong> dan tidak boleh diedit secara langsung.
+                                </p>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6 shadow-lg">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4"><i class="fas fa-print text-rose-400 mr-2"></i>Uji Kefahaman Laporan</h3>
+                                <p class="text-sm text-slate-300 mb-4">Pengetua meminta anda menyediakan "Senarai 10 Murid Terbaik Tingkatan 4" untuk dibentangkan dalam mesyuarat PIBG esok. Apakah 2 langkah logik komponen yang patut anda laksanakan di Pangkalan Data anda?</p>
+                                
+                                <div class="flex flex-col gap-3 mt-4">
+                                    <button onclick="checkM5('A')" class="bg-slate-700 hover:bg-slate-600 hover:border-slate-500 border border-slate-600 text-white rounded px-4 py-4 transition-colors text-sm text-left shadow-sm">A) Bina 'Table' baharu, kemudian bina 'Form'.</button>
+                                    <button onclick="checkM5('B')" class="bg-slate-700 hover:bg-slate-600 hover:border-slate-500 border border-slate-600 text-white rounded px-4 py-4 transition-colors text-sm text-left shadow-sm">B) Bina 'Macro' tutup sistem, kemudian bina 'Table'.</button>
+                                    <button onclick="checkM5('C')" class="bg-slate-700 hover:bg-rose-600 hover:border-rose-500 border border-slate-600 text-white rounded px-4 py-4 transition-colors text-sm text-left shadow-sm font-semibold border-rose-500/30">C) Bina 'Query' menapis markah tertinggi, kemudian jana 'Report' dari Query tersebut untuk dicetak.</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul6':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-teal-500/20 text-teal-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">2.3.6</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Sistem Menu & Makro (Switchboard)</h2>
+                            </div>
+                            
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-8 mb-8 text-slate-300 text-sm md:text-base leading-relaxed shadow-lg">
+                                <p class="mb-4">Sistem yang lengkap tidak akan membiarkan penggunanya terkial-kial mencari fail Form atau Report yang tersembunyi di paparan panel belakang RDBMS. Sebaliknya, pembangun sistem membina satu <strong>Papan Suis (Switchboard)</strong> atau Menu Utama.</p>
+                                
+                                <p class="mb-6">Menu ini dikawal menggunakan <strong>Makro (Macro)</strong>, iaitu satu siri arahan yang diautomasikan (automated actions) apabila butang diklik (Event: On-Click) tanpa memerlukan kemahiran menaip kod SQL kompleks.</p>
+
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                                    <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl">
+                                        <h3 class="font-bold text-teal-400 mb-3 border-b border-slate-700 pb-2"><i class="fas fa-th-large mr-2"></i>Komponen Asas Switchboard</h3>
+                                        <p class="text-xs text-slate-400 mb-3">Sesebuah Menu Utama yang standard MESTILAH mengandungi sekurang-kurangnya navigasi pantas (Button/Macro) untuk:</p>
+                                        <ul class="text-sm text-slate-300 space-y-2 list-decimal pl-4">
+                                            <li>Membuka halaman <strong>Borang (Form)</strong> untuk input kemasukan data.</li>
+                                            <li>Membuka halaman paparan <strong>Laporan (Report)</strong>.</li>
+                                            <li class="text-rose-400 font-bold">Fungsi <strong>Keluar / Tutup Aplikasi (Quit/Exit)</strong> yang selamat.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl flex flex-col items-center justify-center text-center">
+                                        <div class="w-full bg-slate-800 border-2 border-slate-600 rounded-lg p-4 shadow-xl">
+                                            <h4 class="text-white font-bold mb-4">Sistem Pengurusan Perpustakaan</h4>
+                                            <button class="w-full bg-blue-600 text-white rounded py-2 mb-2 text-xs font-bold cursor-default pointer-events-none text-left px-4"><i class="fas fa-edit mr-2"></i>Daftar Buku Baharu (Form)</button>
+                                            <button class="w-full bg-emerald-600 text-white rounded py-2 mb-4 text-xs font-bold cursor-default pointer-events-none text-left px-4"><i class="fas fa-print mr-2"></i>Laporan Denda (Report)</button>
+                                            <button class="w-full bg-rose-600 text-white rounded py-2 text-xs font-bold cursor-default pointer-events-none"><i class="fas fa-power-off mr-2"></i>Keluar</button>
+                                        </div>
+                                        <p class="text-[10px] text-slate-500 mt-3">*Contoh visual sebuah Switchboard mudah.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6 shadow-lg">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4"><i class="fas fa-magic text-teal-400 mr-2"></i>Uji Kefahaman</h3>
+                                <p class="text-sm text-slate-300 mb-4">Di dalam Microsoft Access, fungsi memanggil satu arahan untuk membuka borang secara automatik sebaik sahaja butang ditekan dipanggil...</p>
+                                
+                                <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                                    <button onclick="checkM6('A')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-6 py-3 transition-colors text-sm font-semibold flex-1">Query Builder</button>
+                                    <button onclick="checkM6('B')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-6 py-3 transition-colors text-sm font-semibold flex-1">Table Design</button>
+                                    <button onclick="checkM6('C')" class="bg-slate-700 hover:bg-teal-600 border border-teal-500 text-white rounded px-6 py-3 transition-colors text-sm font-semibold flex-1 shadow-[0_0_10px_rgba(20,184,166,0.3)]">Macro Builder</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul7':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-indigo-500/20 text-indigo-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">2.3.7</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Dokumentasi Projek</h2>
+                            </div>
+                            
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-8 mb-8 text-slate-300 text-sm md:text-base leading-relaxed shadow-lg">
+                                <p class="mb-4">Setelah pembinaan pangkalan data lengkap dan sedia untuk dibentangkan (atau diserahkan kepada klien), fasa terakhir dan antara yang terpenting adalah <strong>Pendokumentasian Hasil Kerja</strong>.</p>
+                                <p class="mb-6">Dokumentasi bertindak sebagai rujukan rasm, panduan penyelenggaraan masa hadapan (maintenance), dan manual tunjuk ajar cara operasi perisian.</p>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="bg-slate-900 border-l-4 border-indigo-500 p-5 rounded">
+                                        <h3 class="text-white font-bold mb-2">Dokumentasi Luaran (Manual Pengguna)</h3>
+                                        <p class="text-xs text-slate-400 mb-2">Diberikan kepada <strong>pengguna biasa (End-User)</strong> yang akan menggunakan sistem tersebut secara harian.</p>
+                                        <ul class="list-disc pl-4 space-y-1 text-indigo-300 text-xs">
+                                            <li>Cara memasang perisian (Installation).</li>
+                                            <li>Cara log masuk sistem.</li>
+                                            <li>Langkah-langkah menekan butang, kemasukan data dan mencetak laporan.</li>
+                                            <li>Menyediakan tangkapan skrin paparan antara muka dan mesej ralat am.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-slate-900 border-l-4 border-purple-500 p-5 rounded">
+                                        <h3 class="text-white font-bold mb-2">Dokumentasi Dalaman (Panduan Sistem)</h3>
+                                        <p class="text-xs text-slate-400 mb-2">Disimpan sebagai rujukan sulit <strong>Pembangun Sistem / Pengatur Cara</strong> lain untuk memahami struktur kod.</p>
+                                        <ul class="list-disc pl-4 space-y-1 text-purple-300 text-xs">
+                                            <li>Spesifikasi keperluan perkakasan pelayan (server) / klien.</li>
+                                            <li>Menyediakan lakaran ERD dan jadual Skema Hubungan rasmi.</li>
+                                            <li>Kamus Data (Data Dictionary) beserta kod SQL yang digunakan.</li>
+                                            <li>Komen-komen penerangan yang diletakkan di dalam blok kod makro/pengaturcaraan.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6 shadow-lg">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4"><i class="fas fa-book text-indigo-400 mr-2"></i>Uji Kefahaman Dokumentasi</h3>
+                                <p class="text-sm text-slate-300 mb-4">Jika anda menyiapkan projek Folio Tingkatan 5, yang mengandungi penerangan rajah ERD, Skema Hubungan dan spesifikasi jadual Pangkalan Data, dokumen ini tergolong dalam kategori yang mana?</p>
+                                
+                                <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                                    <button onclick="checkM7('B')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-4 py-4 transition-colors text-sm text-left shadow-sm font-semibold">A) Borang Kemasukan Maklumat</button>
+                                    <button onclick="checkM7('A')" class="bg-slate-700 hover:bg-indigo-600 hover:border-indigo-500 border border-slate-600 text-white rounded px-4 py-4 transition-colors text-sm text-left shadow-sm font-semibold border-indigo-500/30">B) Dokumentasi Pembangunan (Dalaman/Sistem)</button>
+                                    <button onclick="checkM7('C')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-4 py-4 transition-colors text-sm text-left shadow-sm font-semibold">C) Manual Pengguna Biasa</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'ujian':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-6">
+                                <span class="bg-yellow-500/20 text-yellow-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold"><i class="fas fa-trophy mr-2"></i>BOSS</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white">Ujian Penilaian Akhir (50 Soalan)</h2>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-5 md:p-8 shadow-2xl relative overflow-hidden">
+                                <div class="relative z-10">
+                                    <h3 class="text-lg md:text-xl font-bold text-white mb-6 border-b border-slate-700 pb-4">Jawab kesemua 50 soalan berikut dengan tepat untuk melengkapkan Topik 2.3.</h3>
+                                    
+                                    <div class="space-y-8 md:space-y-10">
+                                        <!-- Q1 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">1. Langkah paling pertama untuk membangunkan Pangkalan Data Hubungan secara fizikal di dalam RDBMS ialah...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq1" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Membina Laporan (Report)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq1" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Membina Jadual (Table) dan mentakrifkan jenis data (Data Type)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q2 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">2. Jenis data yang manakah paling sesuai dan selamat untuk dijadikan atribut Kunci Primer (Primary Key) secara automatik di MS Access?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq2" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">AutoNumber / Auto Increment</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq2" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Date/Time</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q3 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">3. Mengapakah pembangun sistem membina antaramuka Borang (Form) untuk pelanggan memasukkan data berbanding memberi akses terus ke Jadual (Table)?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq3" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Form melindungi struktur asal pangkalan data, lebih selamat, dan paparan GUI yang lebih mesra pengguna (fokus 1 rekod).</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq3" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kerana Form dapat menjimatkan ruang RAM komputer dan menambah kelajuan storan.</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q4 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">4. Manakah antara berikut merupakan komponen standard kawasan di dalam sebuah paparan Borang (Form)?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq4" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Form Header, Detail, Form Footer</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq4" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Query Header, Form Menu, Print Area</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q5 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">5. Semasa kemasukan data markah ke dalam Borang, anda menetapkan supaya angka tidak boleh melebihi 100. Tetapan ini dinamakan sebagai...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq5" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Data Masking</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq5" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Validation Rule (Peraturan Pengesahan Data)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q6 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">6. "Mesej pop-up amaran yang keluar di skrin sekiranya pengguna menaip data yang melanggar spesifikasi sistem." Merujuk kepada...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq6" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Validation Text (Teks Mesej Ralat)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq6" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Input Mask</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q7 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">7. Apakah tujuan fungsi "Query" atau "Pertanyaan" di dalam pangkalan data?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq7" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Untuk mencari, menyaring, dan mengekstrak rekod yang hanya menepati kriteria (syarat) tertentu.</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq7" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Untuk memadam pangkalan data sekiranya berlaku godaman.</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q8 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">8. Di dalam 'Query Design' MS Access, kriteria diletakkan sebaris di barisan 'Criteria' yang sama pada dua medan berlainan (contoh: Lelaki dan Kadet). Ia mewakili operasi logik...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq8" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">OR (Atau)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq8" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">AND (Dan) - Kedua-dua syarat mesti betul.</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q9 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">9. Membina Query dari DUA Jadual yang berbeza membenarkan kita menyatukan data. Namun ini memerlukan wujudnya sambungan...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq9" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Validation Rule</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq9" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Relationship (Hubungan Kunci Primer & Kunci Asing)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q10 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">10. Untuk perbentangan laporan tahunan atau proses mencetak rumusan pangkalan data ke kertas rasmi, komponen apakah yang paling sesuai dijanakan?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq10" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Laporan (Report)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq10" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Jadual (Table)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q11 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">11. Berbeza dengan Form (Borang) yang boleh menaip kemas kini data, fungsi Report (Laporan) selalunya dibina sebagai...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq11" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Hanya untuk Bacaan (Read-Only)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq11" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Media kemasukan data (Write Access)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q12 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">12. Menu yang menyatukan navigasi pelbagai Borang, Laporan dan butang Keluar ke dalam satu paparan utama GUI dinamakan sebagai...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq12" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Papan Suis Utama (Main Switchboard)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq12" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Report Header</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q13 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">13. Ciri memanggil fungsi membuka form dan menutup tetingkap pada Switchboard kebiasaannya tidak memerlukan penulisan kod SQL, tetapi sebaliknya menggerakkan siri tindakan automatik menggunakan...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq13" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Makro (Macro)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq13" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Input Mask</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q14 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">14. Buku arahan yang mengajar pengguna secara 'step-by-step' tentang cara menekan butang, menyimpan rekod, dan mencetak laporan diklasifikasikan sebagai...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq14" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Dokumentasi Dalaman (Spesifikasi Teknikal)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq14" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Dokumentasi Luaran (Manual Pengguna)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q15 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">15. Kamus Data, rajah ERD, format jadual, dan komen atur cara di simpan di mana bagi membolehkan pengatur cara masa depan mengemaskini (maintain) sistem?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq15" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Dokumentasi Dalaman (Internal Documentation)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq15" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Manual Pelanggan</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q16 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">16. Apakah pandangan (view) yang digunakan untuk menetapkan jenis data bagi setiap medan di MS Access?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq16" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Design View</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq16" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Datasheet View</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q17 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">17. Jenis data "Currency" paling sesuai digunakan untuk...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq17" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Mengira bilangan markah pelajar</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq17" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menyimpan nilai mata wang (RM) dengan tepat</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q18 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">18. Apakah fungsi "Input Mask" pada sifat medan (field properties)?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq18" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Memaparkan kotak ralat warna merah</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq18" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Mewajibkan pengguna memasukkan data mengikut corak (format) spesifik</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q19 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">19. Dalam MS Access, "Validation Text" akan dipaparkan kepada pengguna apabila...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq19" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Data yang dimasukkan melanggar "Validation Rule" yang disetkan</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq19" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Apabila sistem dimulakan (startup)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q20 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">20. Apakah komponen pangkalan data yang digunakan secara eksklusif untuk memudahkan kemasukan data (data entry) tanpa melihat paparan jadual penuh?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq20" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Query (Pertanyaan)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq20" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Borang (Form)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q21 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">21. Bahagian manakah dalam reka bentuk Borang yang selalunya memaparkan tajuk utama (Title) borang tersebut?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq21" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Form Header</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq21" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Form Footer</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q22 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">22. Jika kriteria pencarian "Kuala Lumpur" dan markah ">50" diletakkan pada baris (row) BERBEZA dalam Query Design, ia mewakili operasi logik...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq22" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kriteria AND (Dan)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq22" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kriteria OR (Atau)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q23 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">23. Apakah ciri di dalam Query yang mesti diwujudkan untuk membolehkan kita menyambung data dari dua jadual berbeza?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq23" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Relationship (Hubungan Kunci)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq23" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Validation Text</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q24 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">24. Laporan (Report) kebiasaannya digunakan dalam syarikat perniagaan untuk...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq24" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Memasukkan rekod pengguna baru ke dalam pangkalan data</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq24" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menyusun dan mencetak rekod rasmi di atas kertas / fail digital</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q25 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">25. Fungsi (fitur) "Grouping" dalam sesebuah Laporan (Report) membolehkan...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq25" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Rekod dihimpunkan mengikut kategori (contoh: Semua rekod dipisahkan mengikut kelas)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq25" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Rekod dipadam secara pukal</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q26 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">26. Laporan (Report) sangat berbeza dengan Borang (Form) dari aspek kawalan akses kerana Laporan adalah...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq26" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Digunakan untuk mengubah data secara terus ke dalam sistem</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq26" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Secara lazimnya berstatus 'Read-Only' (Hanya untuk bacaan visual)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q27 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">27. Sebuah Papan Suis (Switchboard) yang direka dengan butang-butang di dalam aplikasi bertindak sebagai...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq27" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menu Utama bagi memudahkan pengguna mencari halaman</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq27" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Senarai kod sumber (source code) aplikasi</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q28 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">28. Makro (Macro) selalu dilekatkan pada "Command Button" untuk tujuan...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq28" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menjana nama jadual baru</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq28" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Melaksanakan siri tindakan secara automatik (seperti buka borang lain) sebaik sahaja diklik</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q29 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">29. Antara senarai berikut, yang manakah merujuk kepada Dokumentasi Luaran pangkalan data?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq29" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Manual Pengguna berserta tangkapan skrin langkah-langkah</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq29" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Lakaran Kamus Data dan Rajah Perhubungan Entiti (ERD)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q30 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">30. Apakah kepentingan Dokumentasi Dalaman (Internal Documentation) yang penuh dengan penjelasan jadual dan kod SQL?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq30" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menjadi bahan bacaan bagi kerani memasukkan data ke dalam sistem</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq30" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Panduan rasmi bagi pengatur cara masa hadapan untuk menyelenggara dan menaik taraf (maintain) sistem</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q31 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">31. Jika sebuah jadual (Table) dicipta TANDA sebarang Kunci Primer (Primary Key), apakah masalah terbesar yang bakal berlaku?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq31" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Sistem gagal membezakan antara dua rekod secara unik jika berlaku persamaan nama.</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq31" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kelajuan memori RAM pangkalan data akan menjadi perlahan.</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q32 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">32. Ciri "Date/Time" merupakan jenis data yang paling sesuai digunakan untuk medan (field)...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq32" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Alamat rumah pelanggan</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq32" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Tarikh lahir pekerja atau waktu operasi</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q33 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">33. Mengapakah setiap Switchboard perlu diletakkan dengan satu butang (Command Button) "Keluar Aplikasi" (Quit / Close)?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq33" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Supaya pengguna boleh menutup pangkalan data dengan selamat dan melindungi fail dari rosak (corrupt).</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq33" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Supaya butang itu boleh membuat salinan sandaran (backup) ke cakera keras secara automatik.</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q34 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">34. Semasa menaip borang keahlian, elemen Borang (Form Control) manakah yang terbaik digunakan untuk membolehkan pengguna memilih jantina "Lelaki" atau "Perempuan" sahaja?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq34" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kotak Teks Biasa (Text Box)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq34" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kotak Kombo (Combo Box / Dropdown)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q35 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">35. "Menyediakan arahan langkah-demi-langkah (step-by-step) berserta tangkapan skrin (screenshots) cara memasukkan rekod pengguna." Ini wajib ada di dalam dokumen...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq35" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Manual Pengguna (User Manual)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq35" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kamus Data Sistem</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q36 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">36. Di dalam carian Query, simbol asterisk (*) dikenali sebagai Wildcard. Contoh penggunaannya ialah Like "A*". Apakah fungsinya?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq36" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Khas untuk mencari pangkalan data berbilang dimensi</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq36" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Digunakan sebagai wakil untuk mencari mana-mana rekod yang huruf pertamanya bermula dengan 'A'</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q37 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">37. Jika anda memasukkan sifat (properties) Validation Rule untuk medan umur sebagai: &gt;= 18, apakah nombor yang AKAN DITOLAK oleh sistem?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq37" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">17</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq37" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">19</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q38 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">38. Di paparan Report (Laporan), anda ingin memaparkan perkiraan "Jumlah Keseluruhan (Total Jualan)" secara automatik. Fitur ini dinamakan sebagai...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq38" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Input Mask Data</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq38" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Fungsi Rumusan (Summary Function - Sum)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q39 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">39. Di kawasan manakah butang arahan navigasi (contohnya: Rekod Seterusnya, Padam Rekod) paling sesuai diletakkan sewaktu mereka bentuk paparan Borang (Form Design)?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq39" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kawasan Form Footer atau Detail bagi kemudahan di bawah capaian tetikus</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq39" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Di luar kawasan Design View sepenuhnya</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q40 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">40. Semasa menganalisa reka bentuk, anda dapati atribut Gred hanya bergantung SEPENUHNYA kepada gabungan Kunci Primer Komposit (No KP + Kod Subjek). Fenomena ini dikenali sebagai...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq40" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kebergantungan Fungsi Transitif</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq40" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kebergantungan Fungsi Sepenuh</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q41 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">41. Kadangkala kita perlukan sebuah borang untuk memaparkan maklumat Jadual Induk dan Jadual Anak secara serentak (contoh: Maklumat Pelanggan di atas, senarai item dibelinya di bawah). Struktur ini dibina menggunakan komponen...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq41" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Subform (Borang Kecil dalam Borang Utama)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq41" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">SubReport</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q42 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">42. Apakah fungsi ciri "Report Wizard" yang terdapat di dalam perisian pengurusan pangkalan data (RDBMS)?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq42" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menulis SQL kod dari kosong</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq42" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Membantu proses penciptaan laporan dengan templat siap terbina secara langkah-demi-langkah</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q43 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">43. Mengapakah pembangunan sistem peringkat sekolah dan perniagaan IKS sering memilih menggunakan Makro untuk sistem navigasinya berbanding penulisan kod program (SQL/VBA) manual?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq43" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Ia dikawal melalui antaramuka bergrafik (GUI) yang membenarkan tindakan automasi mudah tanpa memerlukan kepakaran kod yang kompleks.</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq43" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Makro mampu menyekat penggunaan data luar sepenuhnya.</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q44 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">44. Sekiranya kriteria Query yang ditulis adalah <code>Like "*Ahmad*"</code>, hasil apakah yang akan dipulangkan oleh sistem enjin carian?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq44" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Hanya pelajar yang nama pertamanya ialah 'Ahmad' dan tiada perkataan lain di belakangnya</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq44" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kesemua rekod yang mengandungi perkataan 'Ahmad' tanpa mengira samada ia berada di pangkal, tengah atau hujung nama</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q45 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">45. Di antara berikut, yang manakah merujuk kepada fungsi sebenar bagi Dokumentasi Dalaman yang lengkap?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq45" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Membekalkan pembangun sistem baru dengan Kamus Data, rajah skema, ERD dan panduan penulisan kod untuk proses penambahbaikan (upgrade).</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq45" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menerangkan cara pelanggan mengklik butang untuk mencetak kertas.</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q46 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">46. Sebelum membina sebuah Query carian yang meminjam data dari dua jadual berlainan (contohnya Jadual Pelanggan dan Jadual Pembelian), syarat mutlak (prerequisite) yang mesti dilaksanakan terlebih dahulu ialah...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq46" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Membina Switchboard Panel</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq46" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Membina "Relationship" (Hubungan jadual) menggunakan padanan Primary Key dan Foreign Key yang sah.</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q47 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">47. Memilih jenis data yang tepat akan menjimatkan kelajuan operasi dan memori. Apakah jenis data yang memerlukan jumlah pemakaian memori yang paling minima?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq47" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Boolean / Yes & No (1 bit sahaja)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq47" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Double (Nombor Perpuluhan)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q48 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">48. Sifat atribut "Input Mask" ditetapkan sebagai <code>000-0000</code>. Ini bermaksud sistem MS Access akan memaksa pengguna untuk...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq48" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Memasukkan sebarang huruf selagi ia mempunyai sengkang di tengah.</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq48" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Memasukkan TEPAT 7 digit nombor angka tanpa ada sebarang huruf dibenarkan.</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q49 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">49. Jenis data "AutoNumber" paling bersesuaian untuk diaplikasikan ke atas medan (field) bernama...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq49" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">ID_Pelanggan</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq49" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Harga_Barang</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q50 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">50. Sebagai rumusannya, pembangunan aplikasi dan sistem pangkalan data hubungan yang baik, berstruktur, dan menepati piawaian industri (daripada perancangan ERD hingga ke pelaksanaan dan dokumentasi) dipanggil sebagai kitaran...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq50" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kitaran Ralat Komputer</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq50" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kitaran Hayat Pembangunan Sistem (SDLC)</span></label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button onclick="checkUjian()" class="w-full mt-10 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-orange-900/20 transform transition hover:-translate-y-1">Hantar Jawapan Akhir (50 Soalan)</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // --- Evaluators ---
+        function checkM1(val) {
+            if (val === 'AutoNumber') {
+                if(!state.m1_done) { addXP(100); state.m1_done = true; }
+                showToast("Tepat!", "AutoNumber terbaik kerana sistem jana nombor turutan unik automatik tanpa ruang kesilapan pengguna menaip pendua.");
+            } else {
+                showToast("Salah", "No_Telefon_Bimbit ada sifar ('0') di depan. Jika guna Number, nilai '0' pertama akan hilang/diabai sistem. 'Short Text' paling ideal untuk data alfanumerik panjang yang tidak didarab/bahagi.", "error");
+            }
+        }
+
+        function checkM1(val) {
+            if (val === 'Short Text') {
+                if(!state.m1_done) { addXP(100); state.m1_done = true; }
+                showToast("Tepat Sekali!", "Meskipun dinamakan 'Nombor', Telefon Bimbit (Cth: 012...) dimulakan dengan angka Sifar. Jika guna 'Number', MS Access membuang angka sifar di hadapan. Oleh itu, 'Short Text' paling tepat!");
+            } else {
+                showToast("Cuba lagi", "Berhati-hati. Adakah nombor telefon itu nilai yang kita akan gunakan untuk operasi matematik (Tambah/Darab)? Jika tidak, fikirkan format yang menyokong angka Sifar di depan.", "error");
+            }
+        }
+
+        function checkM2(val) {
+            if (val === 'B') {
+                if(!state.m2_done) { addXP(100); state.m2_done = true; }
+                showToast("Tepat Sekali!", "Borang dicipta khusus sebagai 'tingkap' untuk kemasukan yang cantik dan selamat (GUI) tanpa menjejaskan fail akar 'Table'.");
+            } else {
+                showToast("Salah", "Sila pertimbangkan aspek GUI dan paparan satu-satu (fokus) semasa kemasukan data.", "error");
+            }
+        }
+
+        function checkM3(val) {
+            if (val === 'text') {
+                if(!state.m3_done) { addXP(100); state.m3_done = true; }
+                showToast("Betul!", "Validation Text berfungsi sebagai teks amaran/popup jika syarat dalam Validation Rule dilanggar.");
+            } else {
+                showToast("Kurang Tepat", "Mesej pop-up yang keluar kepada pengguna di panggil 'Text'.", "error");
+            }
+        }
+
+        function checkM4(val) {
+            if (val === 'B') {
+                if(!state.m4_done) { addXP(150); state.m4_done = true; }
+                showToast("Sempurna!", "Meletakkan kriteria pada baris (row) 'Criteria' yang SAMA mengaktifkan logik operasi 'AND'.");
+            } else {
+                showToast("Tersasar", "Perhatikan kedudukan row (baris). Jika row sama ia bermaksud operasi 'DAN'.", "error");
+            }
+        }
+
+        function checkM5(val) {
+            if (val === 'C') {
+                if(!state.m5_done) { addXP(100); state.m5_done = true; }
+                showToast("Tepat!", "Query digunakan untuk mencari/tapis 10 markah tertinggi dahulu, kemudian kita cipta Report berdasarkan Query tadi untuk bentang.");
+            } else {
+                showToast("Salah", "Fikirkan fasa penapisan maklumat dan dokumen yang sesuai untuk dicetak dan dibawa ke mesyuarat.", "error");
+            }
+        }
+
+        function checkM6(val) {
+            if (val === 'C') {
+                if(!state.m6_done) { addXP(150); state.m6_done = true; }
+                showToast("Sempurna!", "Macro Builder digunakan untuk membina satu tindakan (action/event) automatik pada butang Switchboard.");
+            } else if(val === "") {
+                showToast("Sila Pilih", "Pilih jawapan dari senarai.", "error");
+            } else {
+                showToast("Tidak Tepat", "Bina arahan tindakan dikawal oleh pembina jenis 'Makro'.", "error");
+            }
+        }
+
+        function checkM7(val) {
+            if (val === 'A') {
+                if(!state.m7_done) { addXP(100); state.m7_done = true; }
+                showToast("Hebat!", "Maklumat struktur teknikal sistem (skema, ERD) di simpan di bawah fail Dokumentasi Dalaman sebagai rujukan pembangun.");
+            } else {
+                showToast("Tidak Tepat", "Adakah pengguna/klien yang menaip data perlukan gambar ERD anda? Pasti tidak. Fikirkan golongan sasar.", "error");
+            }
+        }
+
+        function checkUjian() {
+            const answers = { 
+                uq1: 'B', uq2: 'A', uq3: 'A', uq4: 'A', uq5: 'B', uq6: 'A', uq7: 'A', uq8: 'B', uq9: 'B', uq10: 'A', uq11: 'A', uq12: 'A', uq13: 'A', uq14: 'B', uq15: 'A',
+                uq16: 'A', uq17: 'B', uq18: 'B', uq19: 'A', uq20: 'B', uq21: 'A', uq22: 'B', uq23: 'A', uq24: 'B', uq25: 'A', uq26: 'B', uq27: 'A', uq28: 'B', uq29: 'A', uq30: 'B',
+                uq31: 'A', uq32: 'B', uq33: 'A', uq34: 'B', uq35: 'A', uq36: 'B', uq37: 'A', uq38: 'B', uq39: 'A', uq40: 'B', uq41: 'A', uq42: 'B', uq43: 'A', uq44: 'B', uq45: 'A',
+                uq46: 'B', uq47: 'A', uq48: 'B', uq49: 'A', uq50: 'B'
+            };
+            let allAnswered = true, allCorrect = true;
+
+            for (let i = 1; i <= 50; i++) {
+                const q = document.querySelector(`input[name="uq${i}"]:checked`);
+                if (!q) { allAnswered = false; break; }
+                if (q.value !== answers[`uq${i}`]) { allCorrect = false; }
+            }
+
+            if (!allAnswered) {
+                showToast("Perhatian", "Sila jawab kesemua 50 soalan Boss Battle.", "error"); return;
+            }
+
+            if (allCorrect) {
+                if(!state.ujian_done) { addXP(1000); state.ujian_done = true; }
+                document.getElementById('content-area').innerHTML = `
+                    <div class="animate-fade-in text-center pt-10 md:pt-20 pb-20">
+                        <i class="fas fa-medal text-7xl md:text-9xl text-orange-400 mb-8 drop-shadow-[0_0_30px_rgba(249,115,22,0.5)]"></i>
+                        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Tahniah! Anda Lulus Cemerlang 50 Soalan!</h1>
+                        <p class="text-sm md:text-xl text-slate-300 max-w-2xl mx-auto px-4">Anda telah benar-benar menguasai asas Pembinaan Pangkalan Data Hubungan dan Microsoft Access dengan sangat gemilang!</p>
+                        <p class="mt-8 text-xl md:text-2xl font-bold text-orange-400">Total XP: ${currentXP}</p>
+                        <div class="mt-12">
+                            <a href="index.html" class="inline-block bg-orange-600 hover:bg-orange-500 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl font-bold text-sm md:text-lg transition-colors shadow-lg shadow-orange-900/50">
+                                <i class="fas fa-home mr-2"></i> Kembali ke Portal Utama
+                            </a>
+                        </div>
+                    </div>
+                `;
+                window.scrollTo(0, 0);
+            } else {
+                showToast("Gagal", "Terdapat jawapan yang salah. Sila ulangkaji modul dan cuba lagi.", "error");
+            }
+        }
+
+        window.onload = () => { loadModule('modul1'); };
+    </script>
+</body>
+</html>
