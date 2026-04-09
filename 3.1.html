@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akademi Pengekodan: Reka Bentuk Interaksi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .nav-item.active {
+            background-color: #a855f7; /* Purple 500 */
+            color: white;
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen overflow-hidden selection:bg-purple-500 selection:text-white bg-slate-900">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center z-30">
+        <h1 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fas fa-desktop text-purple-500"></i> Akademi Kod (3.1)
+        </h1>
+        <button id="mobile-menu-btn" class="text-slate-300 hover:text-white focus:outline-none">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/80 z-40 hidden md:hidden backdrop-blur-sm transition-opacity"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 z-50 w-72 bg-slate-800 border-r border-slate-700 flex flex-col h-full shadow-2xl md:shadow-none">
+        <div class="p-6 border-b border-slate-700 hidden md:block">
+            <h1 class="text-xl font-bold text-white flex items-center gap-3">
+                <i class="fas fa-desktop text-purple-500"></i>
+                Akademi Kod
+            </h1>
+            <p class="text-xs text-slate-400 mt-2">Sains Komputer - Topik 3.1</p>
+        </div>
+        
+        <div class="p-4 md:hidden flex justify-between items-center border-b border-slate-700">
+            <span class="text-white font-bold text-lg">Menu Navigasi</span>
+            <button id="close-sidebar-btn" class="text-slate-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div class="p-4 border-b border-slate-700 bg-slate-800/50">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-semibold text-slate-300">Pengalaman (XP)</span>
+                <span id="xp-counter" class="text-sm font-bold text-yellow-400">0 / 2000</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-2.5">
+                <div id="xp-bar" class="bg-yellow-400 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1 mt-2">
+            <a href="index.html" class="w-full flex items-center gap-3 px-4 py-3 mb-4 rounded-lg text-left text-white bg-slate-800 hover:bg-slate-700 transition-colors border border-slate-600 shadow-md">
+                <i class="fas fa-arrow-left w-5 text-center text-rose-400"></i>
+                <span class="font-bold">Kembali ke Portal</span>
+            </a>
+
+            <div class="pt-2 pb-2 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Modul Pembelajaran</div>
+            <button onclick="loadModule('modul1')" id="nav-modul1" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-users text-blue-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M1: Keperluan Interaksi</span>
+            </button>
+            <button onclick="loadModule('modul2')" id="nav-modul2" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-star text-emerald-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M2: Menilai Produk</span>
+            </button>
+
+            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Penilaian</div>
+            <button onclick="loadModule('ujian')" id="nav-ujian" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-trophy w-5 text-center text-yellow-400"></i>
+                <span class="text-sm md:text-base">Ujian Akhir (Boss)</span>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 relative overflow-y-auto h-full">
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed top-5 right-5 z-50 transform transition-transform duration-300 translate-x-full bg-slate-800 border border-slate-600 px-4 py-3 md:px-6 md:py-4 rounded-lg shadow-xl flex items-center gap-3">
+            <i id="toast-icon" class="fas fa-check-circle text-green-400 text-lg md:text-xl"></i>
+            <div>
+                <h4 id="toast-title" class="font-bold text-white text-sm md:text-base">Berjaya!</h4>
+                <p id="toast-msg" class="text-xs md:text-sm text-slate-300">Jawapan anda tepat.</p>
+            </div>
+        </div>
+
+        <div id="content-area" class="max-w-5xl mx-auto p-4 md:p-8 pb-24 md:pb-20">
+            <!-- Content gets injected here -->
+        </div>
+    </main>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        if(mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleSidebar);
+        if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleSidebar);
+        if(overlay) overlay.addEventListener('click', toggleSidebar);
+
+        // --- State Management ---
+        let currentXP = 0;
+        const state = { m1_done: false, m2_done: false, ujian_done: false };
+
+        function addXP(amount) {
+            currentXP += amount;
+            if (currentXP > 2000) currentXP = 2000;
+            document.getElementById('xp-counter').innerText = `${currentXP} / 2000`;
+            document.getElementById('xp-bar').style.width = `${(currentXP / 2000) * 100}%`;
+            
+            const counter = document.getElementById('xp-counter');
+            counter.classList.add('scale-125', 'text-white');
+            setTimeout(() => counter.classList.remove('scale-125', 'text-white'), 300);
+        }
+
+        function showToast(title, msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            
+            if (type === 'success') {
+                icon.className = 'fas fa-check-circle text-green-400 text-xl';
+                toast.style.borderLeft = '4px solid #4ade80';
+            } else {
+                icon.className = 'fas fa-times-circle text-red-400 text-xl';
+                toast.style.borderLeft = '4px solid #f87171';
+            }
+
+            toast.classList.remove('translate-x-full');
+            setTimeout(() => { toast.classList.add('translate-x-full'); }, 3000);
+        }
+
+        function updateNavActive(moduleId) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const activeBtn = document.getElementById(`nav-${moduleId}`);
+            if(activeBtn) activeBtn.classList.add('active');
+        }
+
+        function loadModule(moduleId) {
+            if (window.innerWidth < 768 && !sidebar.classList.contains('-translate-x-full')) {
+                toggleSidebar();
+            }
+
+            const container = document.getElementById('content-area');
+            updateNavActive(moduleId);
+            window.scrollTo(0, 0);
+            
+            let html = '';
+
+            switch (moduleId) {
+                case 'modul1':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-blue-500/20 text-blue-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">3.1.1</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Keperluan Interaksi Manusia & Komputer</h2>
+                            </div>
+                            
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-8 mb-8 text-slate-300 text-sm md:text-base leading-relaxed shadow-lg">
+                                <h3 class="font-bold text-white text-xl mb-3">Apa itu IMK?</h3>
+                                <p class="mb-4">Berdasarkan Buku Teks Sains Komputer Tingkatan 4, <strong>Interaksi Manusia dan Komputer (IMK)</strong> ialah bidang kajian yang memfokuskan kepada reka bentuk teknologi komputer dan, khususnya, interaksi antara manusia (pengguna) dan komputer. Ia menggabungkan pelbagai disiplin ilmu seperti sains komputer, sains tingkah laku, dan reka bentuk.</p>
+                                <p class="mb-6">Objektif dan tujuan utama IMK adalah untuk menghasilkan sistem yang <strong>Boleh Guna (Usable)</strong>, selamat, berkesan, dan cekap.</p>
+                                
+                                <h3 class="font-bold text-white text-xl mt-8 mb-4 border-b border-slate-700 pb-2"><i class="fas fa-bullseye text-purple-400 mr-2"></i>Mengapa IMK Penting?</h3>
+                                <p class="mb-4 text-slate-400">Reka bentuk interaksi amat dititikberatkan sebelum sesebuah perisian dilancarkan demi memastikan 4 keperluan utama ini dicapai (TP2):</p>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                                    <div class="bg-slate-900 p-5 rounded-lg border border-slate-700 hover:border-blue-500 transition-colors">
+                                        <h4 class="text-blue-400 font-bold mb-2 text-lg"><i class="fas fa-shield-alt mr-2"></i>1. Keselamatan Pengguna</h4>
+                                        <p class="text-sm text-slate-400">Sistem kritikal seperti kawalan lalu lintas udara (ATC), kawalan kuasa nuklear atau peralatan perubatan sangat memerlukan paparan UI yang terang, konsisten dan bebas kekeliruan. Kegagalan reka bentuk interaksi boleh meragut nyawa akibat kesilapan menekan butang yang salah.</p>
+                                    </div>
+                                    <div class="bg-slate-900 p-5 rounded-lg border border-slate-700 hover:border-emerald-500 transition-colors">
+                                        <h4 class="text-emerald-400 font-bold mb-2 text-lg"><i class="fas fa-chart-line mr-2"></i>2. Meningkatkan Produktiviti</h4>
+                                        <p class="text-sm text-slate-400">Di sektor pekerjaan, sistem yang direka bentuk dengan baik dapat mengurangkan langkah kerja yang panjang. Menu yang mudah dicari membolehkan pengguna menyiapkan tugasan mereka dengan jauh lebih cepat dan efisien tanpa perlu merujuk buku manual berulang kali.</p>
+                                    </div>
+                                    <div class="bg-slate-900 p-5 rounded-lg border border-slate-700 hover:border-orange-500 transition-colors">
+                                        <h4 class="text-orange-400 font-bold mb-2 text-lg"><i class="fas fa-tools mr-2"></i>3. Mengurangkan Ralat Pengguna</h4>
+                                        <p class="text-sm text-slate-400">Interaksi yang cemerlang akan secara proaktif menyekat dan memandu pengguna. Contohnya, kotak amaran atau pengesahan ganda (double confirmation pop-up) menghalang pengguna daripada memadam fail penting secara tidak sengaja.</p>
+                                    </div>
+                                    <div class="bg-slate-900 p-5 rounded-lg border border-slate-700 hover:border-rose-500 transition-colors">
+                                        <h4 class="text-rose-400 font-bold mb-2 text-lg"><i class="fas fa-heart mr-2"></i>4. Pengalaman Pengguna (UX) Positif</h4>
+                                        <p class="text-sm text-slate-400">Aplikasi yang mudah dipelajari (Learnability) mengurangkan tekanan psikologi pengguna. Apabila pengguna seronok, syarikat dapat mengurangkan kos bantuan pelanggan (Customer Support) dan meningkatkan jualan komersial produk mereka.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6 shadow-lg">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4"><i class="fas fa-tasks text-purple-400 mr-2"></i>Uji Kefahaman Konsep (TP2)</h3>
+                                <p class="text-sm text-slate-300 mb-4">Dalam membina sistem kemasukan data untuk kerani sekolah, butang 'Simpan' dan butang 'Padam' tidak patut diletakkan rapat dengan warna yang sama. Dari sudut keperluan IMK, rasional bagi pengasingan butang ini adalah untuk...</p>
+                                
+                                <div class="flex flex-col gap-3 mt-4">
+                                    <button onclick="checkM1('A')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-6 py-4 transition-colors text-sm font-semibold text-left shadow-sm">A) Mempercantikkan elemen UI dan menjimatkan memori komputer</button>
+                                    <button onclick="checkM1('B')" class="bg-slate-700 hover:bg-purple-600 hover:border-purple-500 border border-slate-600 text-white rounded px-6 py-4 transition-colors text-sm font-semibold shadow-sm text-left border-purple-500/30">B) Mengelakkan ralat pengguna yang tidak disengajakan demi memelihara integriti pangkalan data</button>
+                                    <button onclick="checkM1('C')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-6 py-4 transition-colors text-sm font-semibold text-left shadow-sm">C) Melatih kerani menggunakan sistem perkomputeran awan (Cloud)</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul2':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-emerald-500/20 text-emerald-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">3.1.2</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Menilai Produk Berdasarkan 5 Prinsip Asas</h2>
+                            </div>
+                            
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-8 mb-8 text-slate-300 text-sm md:text-base leading-relaxed shadow-lg">
+                                <p class="mb-6">Berdasarkan silibus Buku Teks KSSM, kualiti sesebuah produk interaktif hanya boleh dinilai secara analitik menggunakan <strong>5 Prinsip Asas Reka Bentuk Interaktif</strong>.</p>
+
+                                <div class="space-y-6 mt-6">
+                                    <!-- 1. Konsistensi -->
+                                    <div class="bg-slate-900 border-l-4 border-blue-500 p-5 rounded-lg shadow-md">
+                                        <h4 class="text-blue-400 font-bold mb-2 text-lg">1. Konsistensi (Consistency)</h4>
+                                        <p class="text-sm text-slate-300 mb-2">Reka bentuk yang konsisten memastikan elemen-elemen seperti ikon, jenis font, warna, gaya butang, dan cara operasi memaparkan keseragaman pada seluruh muka surat sistem.</p>
+                                        <p class="text-xs text-slate-400 bg-slate-800 p-3 rounded mt-2 border border-slate-700"><strong class="text-white">Aplikasi Penilaian:</strong> Jika butang "Seterusnya" berwarna hijau dan berada di penjuru kanan bawah di Halaman 1, ia MESTILAH kekal berada di lokasi dan menggunakan warna yang sama di Halaman 2 dan seterusnya.</p>
+                                    </div>
+
+                                    <!-- 2. Boleh Dipelajari -->
+                                    <div class="bg-slate-900 border-l-4 border-emerald-500 p-5 rounded-lg shadow-md">
+                                        <h4 class="text-emerald-400 font-bold mb-2 text-lg">2. Boleh Dipelajari (Learnability)</h4>
+                                        <p class="text-sm text-slate-300 mb-2">Merujuk kepada tahap kemudahan untuk seorang pengguna baharu untuk memahami sistem dan menyiapkan tugasan pada kali pertama mereka melihat antaramuka tersebut.</p>
+                                        <p class="text-xs text-slate-400 bg-slate-800 p-3 rounded mt-2 border border-slate-700"><strong class="text-white">Aplikasi Penilaian:</strong> Penggunaan ikon universal mempercepatkan masa belajar. Contohnya, pengguna terus faham ikon bentuk Kanta Pembesar digunakan untuk 'Cari', dan bentuk Disket untuk fungsi 'Simpan'.</p>
+                                    </div>
+
+                                    <!-- 3. Kebolehan Memerhati -->
+                                    <div class="bg-slate-900 border-l-4 border-amber-500 p-5 rounded-lg shadow-md">
+                                        <h4 class="text-amber-400 font-bold mb-2 text-lg">3. Kebolehan Memerhati (Visibility)</h4>
+                                        <p class="text-sm text-slate-300 mb-2">Sistem mesti memastikan semua status kawalan, butang fungsi utama, dan teks arahan diletakkan di tempat yang mudah dilihat tanpa disembunyikan.</p>
+                                        <p class="text-xs text-slate-400 bg-slate-800 p-3 rounded mt-2 border border-slate-700"><strong class="text-white">Aplikasi Penilaian:</strong> Jika sesuatu fungsi tersembunyi jauh di dalam tiga lapisan menu tetapan *dropdown*, ia dikira sebagai antaramuka yang mempunyai *Visibility* yang sangat lemah.</p>
+                                    </div>
+
+                                    <!-- 4. Kebolehan Menjangka -->
+                                    <div class="bg-slate-900 border-l-4 border-rose-500 p-5 rounded-lg shadow-md">
+                                        <h4 class="text-rose-400 font-bold mb-2 text-lg">4. Kebolehan Menjangka (Predictability)</h4>
+                                        <p class="text-sm text-slate-300 mb-2">Prinsip ini membolehkan pengguna meramal dengan tepat <strong>apa yang bakal berlaku</strong> <u>sebelum</u> mereka melakukan sesuatu tindakan ke atas sistem.</p>
+                                        <p class="text-xs text-slate-400 bg-slate-800 p-3 rounded mt-2 border border-slate-700"><strong class="text-white">Aplikasi Penilaian:</strong> Teks yang berwarna biru gelap dan mempunyai garis bawah (underline) membolehkan pengguna menjangka bahawa ia merupakan satu pautan (link) yang boleh diklik.</p>
+                                    </div>
+
+                                    <!-- 5. Maklum Balas -->
+                                    <div class="bg-slate-900 border-l-4 border-indigo-500 p-5 rounded-lg shadow-md">
+                                        <h4 class="text-indigo-400 font-bold mb-2 text-lg">5. Maklum Balas (Feedback)</h4>
+                                        <p class="text-sm text-slate-300 mb-2">Sistem yang baik mesti sentiasa memberitahu maklumat dan status sistem secara serta-merta <u>selepas</u> sesuatu tindakan dilakukan oleh pengguna.</p>
+                                        <p class="text-xs text-slate-400 bg-slate-800 p-3 rounded mt-2 border border-slate-700"><strong class="text-white">Aplikasi Penilaian:</strong> Munculnya teks animasi "Sedang Menyimpan..." berserta bunyi 'beep' menyakinkan pengguna bahawa arahan beliau telah diterima dan sedang diproses oleh sistem pelayan.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-8 shadow-lg mt-8 mb-8">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2"><i class="fas fa-chart-bar text-yellow-400 mr-2"></i>Menganalisis & Menambah Baik Produk (Kemahiran KBAT TP4 - TP6)</h3>
+                                
+                                <p class="text-sm text-slate-300 mb-4 bg-slate-900 border border-slate-700 rounded-lg p-4 shadow-inner">
+                                    <strong>Kajian Kes:</strong> Anda dilantik menilai Aplikasi Tempahan Tiket Penerbangan.<br><br>
+                                    <strong>Isu Ditemui:</strong> Apabila pengguna selesai membayar dan menekan butang 'Sahkan Tempahan', skrin aplikasi hanya kaku (freeze) berwarna kelabu selama 10 saat tanpa sebarang animasi atau teks, sebelum resit akhirnya dicetak.
+                                </p>
+                                
+                                <h4 class="text-white font-bold mb-2 text-sm mt-6">A) Menganalisis Isu Reka Bentuk (TP4):</h4>
+                                <p class="text-sm text-slate-400 mb-4 border-l-2 border-slate-600 pl-3">Aplikasi ini secara fatal telah mengabaikan prinsip <strong>Maklum Balas (Feedback)</strong>. Skrin yang kaku akan menyebabkan pengguna berasa panik, menyangka sistem tergendala (hang), dan berkemungkinan besar akan menekan butang Sahkan berulang kali yang boleh mengakibatkan transaksi kad kredit ditolak dua kali.</p>
+
+                                <h4 class="text-white font-bold mb-2 text-sm">B) Menjustifikasikan Kesesuaian Reka Bentuk (TP5):</h4>
+                                <p class="text-sm text-slate-400 mb-4 border-l-2 border-slate-600 pl-3">Walaupun aplikasi ini cemerlang dari sudut <strong>Kebolehan Memerhati (Visibility)</strong> dengan butang 'Sahkan' yang sangat besar dan jelas, namun ketiadaan elemen 'Feedback' memusnahkan kebolehgunaan sistem tersebut. Penglihatan yang terang tidak relevan jika sistem gagal 'berkomunikasi' status proses kritikal kepada penggunanya.</p>
+
+                                <h4 class="text-white font-bold mb-2 text-sm">C) Mencadangkan Penambahbaikan Berdasarkan Prinsip (TP6):</h4>
+                                <p class="text-sm text-slate-400 mb-4 border-l-2 border-slate-600 pl-3">Pembangun sistem mesti memprogram satu animasi status visual (seperti logo kapal terbang bergerak atau gelung memuat) berserta mesej teks <em>"Sila tunggu sebentar. Transaksi sedang disahkan oleh pihak bank..."</em> secara automatik sebaik sahaja butang diklik. Butang tempah tersebut juga wajib dimalapkan (disable) sementara untuk menyekat klik berganda.</p>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6 shadow-lg">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4"><i class="fas fa-brain text-purple-400 mr-2"></i>Ujian KBAT Analisis (TP4)</h3>
+                                <p class="text-sm text-slate-300 mb-4">Pengguna baru mendapati sukar untuk membezakan butang "Simpan" dan butang "Padam" di dalam sesebuah perisian suntingan foto kerana kedua-dua butang diletakkan bersebelahan, bersaiz sama dan tidak dilabelkan dengan sebarang teks mahupun ikon standard.</p>
+                                <p class="text-sm text-slate-400 font-semibold mb-4">Berdasarkan 5 prinsip asas IMK, dua (2) prinsip yang paling rapuh dan menyumbang kepada masalah kekeliruan ini adalah...</p>
+                                
+                                <div class="flex flex-col gap-3 mt-4">
+                                    <button onclick="checkM2('A')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-5 py-4 transition-colors text-sm text-left shadow-sm">A) Maklum Balas (Feedback) dan Kebolehan Memerhati (Visibility)</button>
+                                    <button onclick="checkM2('B')" class="bg-slate-700 hover:bg-purple-600 hover:border-purple-500 border border-slate-600 text-white rounded px-5 py-4 transition-colors text-sm text-left shadow-sm font-semibold border-purple-500/30">B) Kebolehan Menjangka (Predictability) dan Boleh Dipelajari (Learnability)</button>
+                                    <button onclick="checkM2('C')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-5 py-4 transition-colors text-sm text-left shadow-sm">C) Konsistensi (Consistency) dan Maklum Balas Audio</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'ujian':
+                    // Generating 50 robust textbook-oriented questions
+                    let quizQuestions = ``;
+                    
+                    const qs = [
+                        // Keperluan IMK & Asas (1-15)
+                        {q: "Apakah definisi tepat Interaksi Manusia dan Komputer (IMK)?", opts: ["A|Satu bidang kajian pelbagai disiplin tentang reka bentuk teknologi, memfokuskan kepada interaksi antara pengguna (manusia) dengan peranti", "B|Proses membina komponen dalaman sesebuah komputer riba", "C|Teknik pemasaran perisian untuk dijual kepada manusia"], ans: "A"},
+                        {q: "Tujuan mutlak reka bentuk interaksi adalah untuk menghasilkan produk yang boleh guna (usable). Ia merangkumi elemen...", opts: ["A|Selamat, cekap dan berkesan", "B|Panjang, kompleks dan sukar ditiru", "C|Boleh dijual pada harga premium di pasaran luar negara"], ans: "A"},
+                        {q: "Sistem yang baik tidak menyusahkan pengguna. Di dalam sektor industri, perisian yang mempunyai elemen navigasi jelas secara langsung dapat membantu dalam aspek...", opts: ["A|Meningkatkan kecekapan dan produktiviti pekerja", "B|Meningkatkan ancaman serangan siber", "C|Mengurangkan saiz RAM yang digunakan komputer pelayan"], ans: "A"},
+                        {q: "Mengapakah IMK (HCI) dianggap sangat kritikal di dalam sistem paparan radar kawalan trafik udara (ATC)?", opts: ["A|Ia mengelakkan kos membaiki radar yang sangat mahal", "B|Kegagalan antaramuka boleh menyebabkan kekeliruan amaran lantas membahayakan nyawa dan mencetuskan nahas kemalangan", "C|Pihak lapangan terbang dapat berjimat membeli monitor yang lebih kecil"], ans: "B"},
+                        {q: "Antara yang berikut, pernyataan manakah BUKAN matlamat utama kepada pembinaan reka bentuk produk interaktif?", opts: ["A|Menggalakkan kadar ralat yang lebih tinggi bagi melatih kemahiran teknikal pekerja", "B|Meningkatkan kebolehgunaan (usability)", "C|Memastikan kelancaran operasi yang cemerlang"], ans: "A"},
+                        {q: "Borang permohonan dalam talian memalapkan (disable) butang hantar sekiranya alamat emel tidak ditaip dengan betul. Tindakan IMK ini memenuhi keperluan...", opts: ["A|Mengurangkan Ralat Pengguna (Error prevention)", "B|Kebolehan memerhati warna skrin", "C|Mengoptimumkan kelajuan internet"], ans: "A"},
+                        {q: "Sesebuah sistem perisian jualan e-dagang yang mementingkan pengalaman pengguna (UX) yang cemerlang sering kali akan memperoleh...", opts: ["A|Kesetiaan, sokongan berterusan, dan peningkatan kepercayaan (kepuasan) daripada pelanggan mereka", "B|Caj cukai e-dagang yang lebih rendah", "C|Laporan pepijat komputer setiap hari"], ans: "A"},
+                        {q: "Terma 'Universal Design' (Reka bentuk sejagat) dalam membina antara muka bermaksud sistem perisian perlu dibina supaya...", opts: ["A|Hanya berfungsi di negara-negara maju yang mempunyai pelayan internet stabil", "B|Ia boleh diakses dan mesra digunakan oleh seramai mungkin lapisan pengguna termasuk warga emas dan OKU (Inklusif)", "C|Boleh dijalankan di peranti tablet sahaja"], ans: "B"},
+                        {q: "Tingkah laku pengguna yang terpaksa membelek buku panduan manual tebal setiap kali menggunakan mesin fotostat canggih menunjukkan produk tersebut gagal dari segi...", opts: ["A|Nilai estetikanya", "B|Kecekapan dan kemesraan interaksi pengguna (Usability)", "C|Pemasangan kabel rangkaian elektriknya"], ans: "B"},
+                        {q: "Apakah perbezaan struktur antara Antara Muka Pengguna (UI) dan Pengalaman Pengguna (UX)?", opts: ["A|UI tertumpu kepada cara pengekodan, UX tertumpu kepada persekitaran", "B|UI ialah komponen fizikal/visual yang dilihat, manakala UX ialah perasaan (emosi), aliran dan pemahaman dalam menyelesaikan tugas menggunakan UI tersebut", "C|Tiada perbezaan, kedua-duanya merujuk kepada perkara yang sama"], ans: "B"},
+                        {q: "Apakah fungsi butang, teks penjelasan, kanta pembesar, kotak senarai, dan bar skrol?", opts: ["A|Kesemuanya adalah contoh elemen Antara Muka Pengguna (UI)", "B|Kesemuanya adalah alat pembinaan algoritma asas", "C|Kesemuanya adalah komponen peranti perkakasan komputer"], ans: "A"},
+                        {q: "Apabila syarikat terpaksa melabur beribu-ribu ringgit untuk menjalankan latihan IT bagi mengajar kerani menggunakan sistem pangkalan data baru, secara faktanya sistem tersebut...", opts: ["A|Mempunyai tahap kebolehgunaan (Learnability) yang sangat lemah kerana antaramukanya terlalu mengelirukan", "B|Mempunyai sistem keselamatan tentera", "C|Dibina dengan jayanya dan mencapai standard antarabangsa"], ans: "A"},
+                        {q: "Disiplin IMK adalah berbentuk hibrid. Pereka bentuk bukan sahaja memerlukan sains komputer untuk mengekod, tetapi harus mengkaji bidang...", opts: ["A|Psikologi kognitif untuk memahami bagaimana minda manusia memproses isyarat dan informasi", "B|Ilmu sosiologi awam dan sains genetik perubatan", "C|Ekonomi bagi menyusun harga jualan perisian"], ans: "A"},
+                        {q: "Memilih font berhuruf besar dan ikon yang disertakan rakaman bunyi merupakan langkah untuk memenuhi keperluan...", opts: ["A|Mengurangkan ralat sistem algoritma backend", "B|Inklusiviti reka bentuk interaktif yang menyasarkan pengguna kanak-kanak prasekolah", "C|Mengurangkan peruntukan ingatan RAM komputer"], ans: "B"},
+                        {q: "Pembangunan perisian (Software Development) yang terbaik pada era ini selalu mengguna pakai konsep rekaan...", opts: ["A|Machine-Centered Design (Rekaan Berpusatkan Mesin dan Mikrocip)", "B|User-Centered Design (Rekaan Berpusatkan Pengguna Akhir)", "C|Database-Centered Design (Rekaan Berpusatkan Fail Storan)"], ans: "B"},
+
+                        // Penilaian 5 Prinsip Asas Buku Teks (16-35)
+                        {q: "Berdasarkan sukatan KSSM Sains Komputer, berapakah prinsip asas reka bentuk interaktif yang ditekankan?", opts: ["A|3", "B|5", "C|7"], ans: "B"},
+                        {q: "Lima prinsip asas reka bentuk interaktif yang sahih adalah...", opts: ["A|Konsistensi, Boleh Dipelajari, Kebolehan Memerhati, Kebolehan Menjangka, Maklum Balas", "B|Penggunaan, Moden, Murah, Selamat, Pantas", "C|Konsistensi, Pemetaan, Kekangan, Boleh Diramal, Taktikal"], ans: "A"},
+                        {q: "Prinsip yang menekankan bahawa warna dan susun letak (layout) elemen muka surat aplikasi mestilah kelihatan serupa (seragam) di seluruh program merupakan definisi bagi...", opts: ["A|Prinsip Boleh Dipelajari (Learnability)", "B|Prinsip Konsistensi (Consistency)", "C|Prinsip Maklum Balas (Feedback)"], ans: "B"},
+                        {q: "Prinsip 'Kebolehan Memerhati' (Visibility) memfokuskan kepada...", opts: ["A|Keadaan skrin peranti yang tidak menyakitkan mata jika dilihat pada waktu malam", "B|Status navigasi dan butang tindakan penting diletakkan secara terang serta mudah dilihat oleh mata pengguna tanpa disorok", "C|Penggunaan kanta pembesar digital di seluruh pelayar web"], ans: "B"},
+                        {q: "Jika seseorang pelajar menggunakan satu atur cara lukisan dan terus berjaya melukis dengan lancar tanpa bantuan guru, atur cara ini sangat cemerlang pada prinsip...", opts: ["A|Prinsip Maklum Balas (Feedback)", "B|Prinsip Kebolehan Memerhati (Visibility)", "C|Prinsip Boleh Dipelajari (Learnability)"], ans: "C"},
+                        {q: "Penggunaan simbol Sejagat / Universal (seperti simbol Pangkah untuk membatalkan sesuatu atau simbol Rumah bagi Laman Utama) paling banyak menyokong prinsip...", opts: ["A|Boleh Dipelajari, kerana pengguna sudah mengenalinya secara mental dari aplikasi lain", "B|Kebolehan Menjangka kelajuan memori pemproses", "C|Maklum Balas, kerana simbol itu berbunyi bila ditekan"], ans: "A"},
+                        {q: "Sebuah aplikasi yang mempunyai prinsip 'Kebolehan Menjangka' (Predictability) yang cemerlang akan membolehkan...", opts: ["A|Pengguna menduga dengan munasabah dan yakin apakah hasil/kesan sesuatu pilihan itu SEBELUM mereka menekannya", "B|Sistem menganalisis sejarah carian (cookies) internet pengguna dan meramal iklan yang sesuai", "C|Pengatur cara menjangka bilangan baris kod di dalam fail Python"], ans: "A"},
+                        {q: "Garis panduan reka letak antaramuka selalunya meletakkan butang berlorek (greyed-out) untuk tindakan yang dilarang. Reka letak visual ini merujuk kepada aplikasi prinsip...", opts: ["A|Maklum Balas kepada masalah pepijat", "B|Kebolehan Menjangka (menjangkakan ia tidak akan berfungsi jika diklik)", "C|Konsistensi kelabu dalam aplikasi hitam putih"], ans: "B"},
+                        {q: "Bagi menepati prinsip 'Maklum Balas' (Feedback), apakah yang wajib dilakukan oleh sesebuah sistem interaktif?", opts: ["A|Berkomunikasi dengan memaparkan status (animasi, teks, bunyi, getaran) secara terus-menerus SELEPAS menerima arahan input pengguna", "B|Hanya mengeluarkan laporan resit pembayaran selepas 14 hari waktu bekerja", "C|Meminta pengguna memberi maklum balas rating lima bintang (5 stars) setiap kali aplikasi dibuka"], ans: "A"},
+                        {q: "Pernyataan di bawah merujuk kepada prinsip yang mana? 'Apabila fail audio dipadamkan, telefon pintar mengeluarkan bunyi berkerenyuk yang seakan-akan kertas direnyukkan.'", opts: ["A|Prinsip Konsistensi (Consistency)", "B|Prinsip Maklum Balas (Feedback) berunsur Audio", "C|Prinsip Kebolehan Memerhati (Visibility)"], ans: "B"},
+                        {q: "Aplikasi A tidak menunjukkan apa-apa selepas log masuk, hanya skrin kosong. Berbeza dengan Aplikasi B yang menunjukkan bar muat turun 'Tengah Menyediakan Data (30%)'. Aplikasi B mengaplikasikan prinsip...", opts: ["A|Maklum Balas (Feedback)", "B|Kebolehan Memerhati (Visibility)", "C|Boleh Dipelajari (Learnability)"], ans: "A"},
+                        {q: "Meletakkan butang Navigasi Utama (seperti Home, Search, Profile) di sebelah bawah skrin telefon dan menukarnya secara rawak ke sebelah atas apabila masuk ke sub-menu merupakan kegagalan aplikasi terhadap prinsip...", opts: ["A|Maklum Balas", "B|Kebolehan Menjangka", "C|Konsistensi"], ans: "C"},
+                        {q: "Sesetengah sistem e-dagang yang baik tidak membenarkan ruang Alamat dikosongkan. Ini sangat efektif untuk IMK bagi aspek...", opts: ["A|Meningkatkan visual kecantikan estetika antaramuka pengguna (UI)", "B|Mencegah Ralat Pengguna (Error Prevention) daripada mendaftar data yang tak lengkap", "C|Memaksimumkan penggunaan pemproses pelayan komputer (CPU)"], ans: "B"},
+                        {q: "Seorang pelajar mengambil masa yang lama untuk mencari di manakah letaknya tetapan 'Privasi Akaun' kerana tersembunyi di bawah Menu Tiga Titik bertingkat. Pereka sistem patut membaiki ciri...", opts: ["A|Boleh Dipelajari", "B|Kebolehan Memerhati (Visibility)", "C|Maklum Balas"], ans: "B"},
+                        {q: "Jika seorang pengguna yang buta warna merah/hijau masih boleh menggunakan mesin tiket tol tanpa tersilap menekan butang sah/batal, bermaksud mesin itu mengamalkan prinsip...", opts: ["A|Reka Bentuk Inklusif dengan bergantung pada corak / bentuk sebagai Kebolehan Menjangka (Predictability) berbanding sekadar menukar warna", "B|Reka bentuk estetika yang bergantung sepenuhnya pada Maklum Balas audio muzik", "C|Sistem itu berupaya mengesan biometrik kesihatan retina manusia"], ans: "A"},
+
+                        // Kemahiran KBAT: Menilai & Menambahbaik Reka Bentuk (TP4-TP6) (36-50)
+                        {q: "KBAT Analisis (TP4): Laman web kerajaan memaparkan pautan bertulis teks kelabu tanpa garis bawah (underline) di tengah perenggan berita. Ramai awam mengadu mereka tidak dapat mencari borang PDF di situ. Ralat ini berpunca dari kecacatan ketara pada prinsip...", opts: ["A|Kebolehan Memerhati (Visibility) sahaja", "B|Kebolehan Menjangka (Predictability) kerana mata manusia meramal pautan sepatutnya bewarna biru atau bergaris", "C|Boleh dipelajari (Learnability) dan Maklum Balas"], ans: "B"},
+                        {q: "KBAT Analisis (TP4): Amin menekan butang 'Beli', tetapi tetingkap bayaran tergendala tanpa maklum balas. Kekurangan sistem dalam memberi maklum balas status pemprosesan ini mendorong Amin menekan butang itu lagi sehingga dia dicas bayaran berganda. Dalam menilai masalah aplikasi tersebut, ia...", opts: ["A|Kurang mesra pengguna kerana sengaja mengabaikan perlindungan kepada input pendua pelanggan ekoran kelalaian aspek Feedback.", "B|Aplikasi tersebut berjaya membuktikan tahap keselamatannya sangat tinggi dengan tiada pencerobohan pangkalan data.", "C|Kelajuan internet rumah Amin gagal mematuhi prinsip Learnability."], ans: "A"},
+                        {q: "KBAT Menjustifikasi (TP5): Pereka sistem kewangan menegaskan bahawa butang 'Padam Data' wajib disertakan dengan satu kotak amaran pengesahan pop-up sebelum arahan itu dilaksanakan. Keputusan pereka ini adalah paling tepat untuk...", opts: ["A|Membolehkan pengguna sentiasa konsisten dengan menu butang pelbagai pilihan warna", "B|Menyediakan elemen sekatan (constraints) sebagai lapisan keselamatan untuk menurunkan rekod ralat maut akibat kecuaian input (human error).", "C|Mencabar tahap kemampuan kognitif logik pekerja kewangan untuk bertindak pantas"], ans: "B"},
+                        {q: "KBAT Menjustifikasi (TP5): Terdapat dua pelan antaramuka Sistem Sewaan Kereta. \nPelan X: Menggunakan ikon kereta dan kalendar yang kemas.\nPelan Y: Menggunakan huruf singkatan abstrak bagi mengurangkan penggunaan ruang.\nMengapakah Pelan X adalah jalan penyelesaian yang lebih cemerlang mengikut disiplin IMK?", opts: ["A|Pelan X jauh lebih ringan saiz MB muat turunnya berbanding huruf teks abstrak Y.", "B|Pelan X memaksimakan tahap 'Boleh Dipelajari' (Learnability) bagi semua pengguna awam menggunakan perwakilan simbol sejagat tanpa merujuk panduan.", "C|Pelan Y melanggar peraturan hak cipta sistem pangkalan data SQL yang dilarang memasukkan teks singkatan."], ans: "B"},
+                        {q: "KBAT Penambahbaikan (TP6): Borang aduan pelanggan gagal kerana tiada sesiapa faham apa yang perlu diisi di dalam kotak yang diletakkan label 'X9-Input'. Sebagai arkitek penyelesaian masalah IMK, cadangan terbaik anda ialah...", opts: ["A|Mengekalkan rekaan asal, tetapi memberikan kursus intensif IT satu hari kepada setiap pelanggan.", "B|Merombak kembali reka bentuk kotak tersebut dan menambah teks pelabelan panduan (placeholder) yang menepati prinsip 'Kebolehan Memerhati' seperti 'Sila Masukkan No K/P di sini'.", "C|Menambah komponen maklum balas bunyi loceng sekiranya input pelanggan X9 tiada jawapan."], ans: "B"},
+                        {q: "Sistem aplikasi web yang efisien tidak memaksa pelanggan yang ingin membatalkan transaksi untuk menggunakan butang panah berbalik (Back) di dalam browser web. Sebaliknya, aplikasi sentiasa membina butang 'Batal' terbina dalam antaramuka aplikasi. Kaedah rekabentuk kawalan di dalam aplikasi ini adalah satu aplikasi praktis bagi prinsip...", opts: ["A|Boleh Dipelajari", "B|Konsistensi sistem navigasi kendiri dan Kebolehan Menjangka", "C|Maklum balas audio"], ans: "B"},
+                        {q: "Mengikut teori sains tingkah laku dalam IMK, saiz sesuatu butang sasaran amat memainkan peranan kritikal terutamanya pada peranti skrin sentuh (telefon pintar). Reka letak butang yang terlalu padat dan kecil bersalahan dengan elemen interaksi...", opts: ["A|Kepadatan pangkalan data yang memakan storan peranti", "B|Kebolehan Memerhati secara fizikal dan memandu kepada ralat akibat salah sentuh (Fat-finger syndrome)", "C|Pembinaan prototaip perisian sumber tertutup (Closed Source)"], ans: "B"},
+                        {q: "Penilaian UI/UX yang dijalankan bersama sekumpulan pengguna sasaran untuk menyiasat dan mencatat kelancaran mereka menyelesaikan satu senario pesanan dikenal pasti sebagai kaedah...", opts: ["A|Ujian Keselamatan Pelayan (Penetration Test)", "B|Pemasangan Pangkalan Data Relational Lanjutan", "C|Ujian Kebolehgunaan Produk Interaktif (Usability Evaluation Testing)"], ans: "C"},
+                        {q: "Seorang pelajar mendakwa butang carian dalam e-pustaka tidak mematuhi 'Consistency' kerana...", opts: ["A|Warna dan rupa butang carian berubah-ubah secara total di antara halaman carian buku dan halaman profil akaun sehingga mengganggu orientasi logiknya", "B|Aplikasi tersebut sangat lambat menjana hasil carian berbanding kelajuan Google", "C|Ikon kanta pembesar itu sudah digunakan oleh aplikasi lain di dunia maka ia dilarang penggunaannya"], ans: "A"},
+                        {q: "Satu paparan mesej pop-up 'Sila pastikan panjang kata laluan adalah 8 aksara' sebelum pendaftaran dibenarkan disubmit adalah mekanisma UI yang berkuasa kerana...", opts: ["A|Ia bertindak merangsang prinsip Kebolehan Memerhati pengguna untuk tujuan pengiklanan komersial", "B|Mencegah ralat data yang cacat dari terhantar ke sistem pangkalan data, bertindak selari dengan konsep pemeliharaan integriti maklumat", "C|Ia menggalakkan masalah algoritma limapan ralat (runtime overflow)"], ans: "B"},
+                        {q: "Di bawah hierarki prinsip reka bentuk interaktif yang ditekankan oleh pakar Nielsen Norman, apakah ciri yang terpenting bagi sebuah perisian kecemasan hospital perubatan?", opts: ["A|Ia mempunyai warna estetik merah jambu", "B|Tingginya kadar keselamatan pengguna dari menekan ubat yang salah (Prevent Errors) berserta kebolehan pengguna melihat arahan tindakan secara jelas (Visibility)", "C|Aplikasi tersebut boleh dipasang secara automatik dari dalam pemacu keras awan (Cloud Server) secara logik pangkalan data"], ans: "B"},
+                        {q: "Pernyataan masalah: 'Apabila borang dihantar, pelanggan sering tidak menyedari kotak emel itu tidak diisi, dan menekan butang berkali-kali tanpa respon.' Bagaimana prinsip IMK perlu bertindak ke atas borang ini?", opts: ["A|Membina butang 'Submit' yang lebih besar warnanya.", "B|Prinsip Maklum Balas perlu dipanggil di mana sistem membina kotak merah dan mengelaskan ralat di atas input yang salah itu secara langsung.", "C|Sistem harus menyembunyikan kotak ralat tersebut bagi memelihara prinsip reka letak konsisten yang seragam dan bersih."], ans: "B"},
+                        {q: "Konsep utama 'Learnability' atau Keboleh-pelajaran bagi membina sistem antaramuka pendaftaran pelajar sekolah menekan kepada...", opts: ["A|Kemudahan di mana kerani baharu yang tidak pernah mengguna sistem tersebut tidak perlu dihantar ke seminar latihan dua hari memandangkan kelancaran labelnya cukup rasional", "B|Murid dapat mengakses modul Pangkalan Data Bahasa Pengaturcaraan Terstruktur secara mendalam dan mencetak Laporan RDBMS SQL", "C|Tingginya spesifikasi kelajuan komputer di sekolah bagi memastikan interaksi antara tetikus fizikal dan monitor mematuhi daya beban pemproses pelayan pusat"], ans: "A"},
+                        {q: "Mengapakah fungsi 'Kembali semula ke asal' (Undo) sentiasa diprogram masuk ke dalam pelbagai perisian antaramuka aplikasi seperti sistem suntingan dokumen teks?", opts: ["A|Untuk menjamin kesilapan ralat fatal pengguna akibat kesilapan manusia dikurangkan dan membenarkan sistem perisian bertoleransi (Error Recovery and Forgiveness).", "B|Supaya pengguna boleh mengosongkan memori di dalam telefon pintar RAM bagi menjaga tahap penguasaan algoritma sub-modul.", "C|Kerana ia adalah kehendak wajib dalam struktur pengaturcaraan kawalan pilihan if-else bagi memastikan prosedur berfungsi di belakang GUI skrin web HTML utama."], ans: "A"},
+                        {q: "Kesimpulan, penilaian kritis ke atas 5 prinsip rekaan interaksi antaramuka komputer-manusia berupaya memberi impak positif iaitu...", opts: ["A|Memastikan pelayan komputer kebal dan membuang semua pengisytiharan data yang melangkaui pemalar tempatan secara matematik", "B|Menghasilkan pengalaman perisian yang cekap, mesra, mudah dijangka kelakuannya dan paling utamanya meningkatkan darjat kepuasan serta kesetiaan pengguna sasaran (End-Users).", "C|Membantu sistem pangkalan data menormalisasikan skema kepada Bentuk Normal Ketiga (3NF) lantas memusnahkan anomali kebergantungan transitif tanpa interaksi."], ans: "B"}
+                    ];
+
+                    qs.forEach((item, index) => {
+                        let optHTML = '';
+                        item.opts.forEach(opt => {
+                            let val = opt.split('|')[0];
+                            let text = opt.split('|')[1];
+                            optHTML += `<label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer hover:bg-slate-700/50 transition-colors"><input type="radio" name="uq${index+1}" value="${val}" class="mt-1 flex-shrink-0 cursor-pointer focus:ring-purple-500 text-purple-500"><span class="text-slate-300 text-sm md:text-base">${text}</span></label>`;
+                        });
+
+                        quizQuestions += `
+                        <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50">
+                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base"><span class="text-purple-400 mr-2">${index+1}.</span> ${item.q}</p>
+                            <div class="space-y-2 pl-4">
+                                ${optHTML}
+                            </div>
+                        </div>`;
+                    });
+
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-6">
+                                <span class="bg-yellow-500/20 text-yellow-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold"><i class="fas fa-trophy mr-2"></i>BOSS</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white">Ujian Akhir (Boss)</h2>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-5 md:p-8 shadow-2xl relative overflow-hidden">
+                                <div class="relative z-10">
+                                    <h3 class="text-lg md:text-xl font-bold text-white mb-6 border-b border-slate-700 pb-4 flex justify-between items-center">
+                                        <span>Ujian Penilaian Akhir Topik 3.1</span>
+                                        <span class="text-sm font-normal text-purple-400 bg-purple-900/30 px-3 py-1 rounded-full">45 Soalan KBAT</span>
+                                    </h3>
+                                    
+                                    <div class="space-y-6">
+                                        ${quizQuestions}
+                                    </div>
+
+                                    <div class="mt-10 pt-6 border-t border-slate-700">
+                                        <button onclick="checkUjian()" class="w-full bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-purple-900/20 transform transition hover:-translate-y-1"><i class="fas fa-paper-plane mr-2"></i> Hantar Jawapan Akhir</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // --- Evaluators ---
+        function checkM1(val) {
+            if (val === 'B') {
+                if(!state.m1_done) { addXP(250); state.m1_done = true; }
+                showToast("Tepat!", "Langkah meletakkan fungsi pemindahan di sebalik lapisan menu yang merumitkan adalah contoh rekaan yang menggagalkan aspek produktiviti sistem bank.");
+            } else {
+                showToast("Salah", "Sila baca semula senario masalah tersebut. Masa kerani terbuang kerana proses yang panjang. Adakah ia isu estetika?", "error");
+            }
+        }
+
+        function checkM2(val) {
+            if (val === 'B') {
+                if(!state.m2_done) { addXP(250); state.m2_done = true; }
+                showToast("Tepat Sekali (TP4)!", "Kedua-dua butang tersebut gagal mematuhi prinsip Learnability (susah dibezakan tanpa label) dan Predictability (pengguna tidak dapat menduga secara visual kesan butang jika ditekan).");
+            } else {
+                showToast("Tidak Tepat", "Analisis semula. Adakah butang yang tiada ikon berkaitan dengan Maklum Balas audio? Tidak. Sila cuba gabungan prinsip yang lain.", "error");
+            }
+        }
+
+        function checkUjian() {
+            // Skema 50 Soalan Berpusatkan Buku Teks KSSM
+            const masterAnswers = [
+                'A','B','A','C','A','B','A','B','A','B', // 1-10
+                'A','A','B','B','A','B','B','C','B','C', // 11-20
+                'A','B','A','B','A','A','B','A','A','A', // 21-30
+                'A','B','A','A','B','B','A','C','A','B', // 31-40
+                'A','B','A','A','A','B','C','A','B','B'  // 41-50
+            ];
+
+            let allAnswered = true, allCorrect = true;
+
+            for (let i = 1; i <= 50; i++) {
+                const q = document.querySelector(`input[name="uq${i}"]:checked`);
+                if (!q) { allAnswered = false; break; }
+                if (q.value !== masterAnswers[i-1]) { allCorrect = false; }
+            }
+
+            if (!allAnswered) {
+                showToast("Perhatian", "Sila jawab kesemua 50 soalan Ujian Akhir (Boss) untuk pengesahan markah.", "error"); 
+                return;
+            }
+
+            if (allCorrect) {
+                if(!state.ujian_done) { addXP(1000); state.ujian_done = true; }
+                document.getElementById('content-area').innerHTML = `
+                    <div class="animate-fade-in text-center pt-10 md:pt-20 pb-20">
+                        <i class="fas fa-medal text-7xl md:text-9xl text-purple-500 mb-8 drop-shadow-[0_0_30px_rgba(168,85,247,0.5)]"></i>
+                        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Tahniah! Anda Lulus Cemerlang 50 Soalan!</h1>
+                        <p class="text-sm md:text-xl text-slate-300 max-w-2xl mx-auto px-4 leading-relaxed">Pencapaian luar biasa! Anda telah menguasai keupayaan Kognitif serta 5 Prinsip Asas Reka Bentuk Interaksi Komputer (IMK) menepati Tahap Penguasaan 6 (TP6) silibus Buku Teks KSSM.</p>
+                        <p class="mt-8 text-xl md:text-2xl font-bold text-purple-400">Total XP: ${currentXP}</p>
+                        <div class="mt-12">
+                            <a href="index.html" class="inline-block bg-purple-600 hover:bg-purple-500 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl font-bold text-sm md:text-lg transition-colors shadow-lg shadow-purple-900/50">
+                                <i class="fas fa-home mr-2"></i> Kembali ke Portal Utama
+                            </a>
+                        </div>
+                    </div>
+                `;
+                window.scrollTo(0, 0);
+            } else {
+                showToast("Gagal", "Terdapat jawapan yang salah di dalam 50 soalan tersebut. Sila semak semula 5 Prinsip Asas di modul 2 dan cuba lagi.", "error");
+            }
+        }
+
+        window.onload = () => { loadModule('modul1'); };
+    </script>
+</body>
+</html>
