@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akademi Pengekodan: Pembangunan Aplikasi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .nav-item.active {
+            background-color: #e11d48; /* Rose 600 */
+            color: white;
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen overflow-hidden selection:bg-rose-500 selection:text-white bg-slate-900">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center z-30">
+        <h1 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fas fa-rocket text-rose-500"></i> Akademi Kod (1.7)
+        </h1>
+        <button id="mobile-menu-btn" class="text-slate-300 hover:text-white focus:outline-none">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/80 z-40 hidden md:hidden backdrop-blur-sm transition-opacity"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 z-50 w-72 bg-slate-800 border-r border-slate-700 flex flex-col h-full shadow-2xl md:shadow-none">
+        <div class="p-6 border-b border-slate-700 hidden md:block">
+            <h1 class="text-xl font-bold text-white flex items-center gap-3">
+                <i class="fas fa-rocket text-rose-500"></i>
+                Akademi Kod
+            </h1>
+            <p class="text-xs text-slate-400 mt-2">Sains Komputer - Topik 1.7</p>
+        </div>
+        
+        <div class="p-4 md:hidden flex justify-between items-center border-b border-slate-700">
+            <span class="text-white font-bold text-lg">Menu Navigasi</span>
+            <button id="close-sidebar-btn" class="text-slate-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div class="p-4 border-b border-slate-700 bg-slate-800/50">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-semibold text-slate-300">Pengalaman (XP)</span>
+                <span id="xp-counter" class="text-sm font-bold text-yellow-400">0 / 1500</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-2.5">
+                <div id="xp-bar" class="bg-yellow-400 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <a href="index.html" class="w-full flex items-center gap-3 px-4 py-3 mb-4 rounded-lg text-left text-white bg-slate-800 hover:bg-slate-700 transition-colors border border-slate-600 shadow-md">
+                <i class="fas fa-arrow-left w-5 text-center text-rose-400"></i>
+                <span class="font-bold">Kembali ke Portal</span>
+            </a>
+
+            <div class="pt-2 pb-2 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Modul Pembelajaran</div>
+            <button onclick="loadModule('modul1')" id="nav-modul1" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-sitemap text-rose-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M1: SDLC Fasa 1 & 2</span>
+            </button>
+            <button onclick="loadModule('modul2')" id="nav-modul2" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-cogs text-amber-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M2: SDLC Fasa 3 - 5</span>
+            </button>
+            <button onclick="loadModule('modul3')" id="nav-modul3" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-window-maximize text-teal-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M3: Antara Muka (GUI)</span>
+            </button>
+            <button onclick="loadModule('modul4')" id="nav-modul4" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-mobile-alt text-indigo-400 w-5 text-center"></i>
+                <span class="text-sm md:text-base">M4: Kitaran Projek</span>
+            </button>
+            <div class="pt-4 pb-2 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Penilaian</div>
+            <button onclick="loadModule('ujian')" id="nav-ujian" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-slate-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-trophy w-5 text-center text-yellow-400"></i>
+                <span class="text-sm md:text-base">Ujian Akhir (Boss)</span>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 relative overflow-y-auto h-full">
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed top-5 right-5 z-50 transform transition-transform duration-300 translate-x-full bg-slate-800 border border-slate-600 px-4 py-3 md:px-6 md:py-4 rounded-lg shadow-xl flex items-center gap-3">
+            <i id="toast-icon" class="fas fa-check-circle text-green-400 text-lg md:text-xl"></i>
+            <div>
+                <h4 id="toast-title" class="font-bold text-white text-sm md:text-base">Berjaya!</h4>
+                <p id="toast-msg" class="text-xs md:text-sm text-slate-300">Jawapan anda tepat. +50 XP</p>
+            </div>
+        </div>
+
+        <div id="content-area" class="max-w-5xl mx-auto p-4 md:p-8 pb-24 md:pb-20">
+            <!-- Content gets injected here -->
+        </div>
+    </main>
+
+    <script>
+        // --- Mobile Menu Logic ---
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        if(mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleSidebar);
+        if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleSidebar);
+        if(overlay) overlay.addEventListener('click', toggleSidebar);
+
+        // --- State Management ---
+        let currentXP = 0;
+        const state = { m1_done: false, m2_done: false, m3_done: false, m4_done: false, ujian_done: false };
+
+        function addXP(amount) {
+            currentXP += amount;
+            if (currentXP > 1500) currentXP = 1500;
+            document.getElementById('xp-counter').innerText = `${currentXP} / 1500`;
+            document.getElementById('xp-bar').style.width = `${(currentXP / 1500) * 100}%`;
+            
+            const counter = document.getElementById('xp-counter');
+            counter.classList.add('scale-125', 'text-white');
+            setTimeout(() => counter.classList.remove('scale-125', 'text-white'), 300);
+        }
+
+        function showToast(title, msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            
+            if (type === 'success') {
+                icon.className = 'fas fa-check-circle text-green-400 text-xl';
+                toast.style.borderLeft = '4px solid #4ade80';
+            } else {
+                icon.className = 'fas fa-times-circle text-red-400 text-xl';
+                toast.style.borderLeft = '4px solid #f87171';
+            }
+
+            toast.classList.remove('translate-x-full');
+            setTimeout(() => { toast.classList.add('translate-x-full'); }, 3000);
+        }
+
+        function updateNavActive(moduleId) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const activeNav = document.getElementById(`nav-${moduleId}`);
+            if(activeNav) activeNav.classList.add('active');
+        }
+
+        function loadModule(moduleId) {
+            if (window.innerWidth < 768 && !sidebar.classList.contains('-translate-x-full')) {
+                toggleSidebar();
+            }
+
+            const container = document.getElementById('content-area');
+            updateNavActive(moduleId);
+            window.scrollTo(0, 0);
+            
+            let html = '';
+
+            switch (moduleId) {
+                case 'modul1':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-rose-500/20 text-rose-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">1.7.1</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Pengenalan SDLC (Fasa 1 & 2)</h2>
+                            </div>
+                            
+                            <p class="text-slate-300 mb-6 text-sm md:text-lg">Kitaran Hayat Pembangunan Sistem (SDLC) memastikan pembinaan perisian lebih teratur, sistematik dan memenuhi kehendak pelanggan.</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8 md:mb-10">
+                                <!-- Fasa 1 -->
+                                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 hover:-translate-y-1 transition-transform">
+                                    <div class="text-rose-400 font-bold mb-2 text-xl md:text-2xl"><i class="fas fa-search mr-2"></i>Fasa 1</div>
+                                    <h3 class="font-bold text-white text-base md:text-lg mb-2">Menganalisa Masalah</h3>
+                                    <p class="text-xs md:text-sm text-slate-400 mb-3">Tujuan utama fasa ini adalah untuk mengetahui <strong>keperluan</strong> perisian dan apakah <strong>masalah</strong> yang sedang dihadapi oleh pelanggan/pengguna.</p>
+                                    <ul class="text-xs md:text-sm text-slate-300 space-y-2">
+                                        <li><i class="fas fa-check text-green-400 mr-2"></i>Temu bual / Pemerhatian</li>
+                                        <li><i class="fas fa-check text-green-400 mr-2"></i>Mengenal pasti Input, Proses, Output</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Fasa 2 -->
+                                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 hover:-translate-y-1 transition-transform">
+                                    <div class="text-amber-400 font-bold mb-2 text-xl md:text-2xl"><i class="fas fa-pencil-ruler mr-2"></i>Fasa 2</div>
+                                    <h3 class="font-bold text-white text-base md:text-lg mb-2">Mereka Bentuk Penyelesaian</h3>
+                                    <p class="text-xs md:text-sm text-slate-400 mb-3">Sebelum mengekod, kita perlu menghasilkan rangka sistem, paparan dan reka bentuk langkah penyelesaian.</p>
+                                    <ul class="text-xs md:text-sm text-slate-300 space-y-2">
+                                        <li><i class="fas fa-check text-green-400 mr-2"></i>Menulis Pseudokod / Carta Alir</li>
+                                        <li><i class="fas fa-check text-green-400 mr-2"></i>Melakar Antara Muka (GUI)</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4"><i class="fas fa-dumbbell mr-2 text-rose-400"></i>Cabaran Kefahaman</h3>
+                                <p class="text-sm text-slate-300 mb-4">"Ahmad sedang melukis bentuk kotak dan anak panah untuk merancang aliran sistem e-dagang." Aktiviti ini berada di dalam fasa yang mana?</p>
+                                
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <select id="m1-q1" class="bg-slate-700 text-white text-sm rounded border border-slate-600 focus:border-rose-500 p-3 outline-none w-full sm:w-1/2">
+                                        <option value="">-- Pilih Fasa --</option>
+                                        <option value="1">Fasa 1: Menganalisa Masalah</option>
+                                        <option value="2">Fasa 2: Mereka Bentuk Penyelesaian</option>
+                                    </select>
+                                    <button onclick="checkM1()" class="bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 sm:py-2 rounded-lg font-semibold transition-colors w-full sm:w-auto text-sm md:text-base">Semak Jawapan</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul2':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-amber-500/20 text-amber-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">1.7.1</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">SDLC (Fasa 3, 4 & 5)</h2>
+                            </div>
+                            
+                            <p class="text-slate-300 mb-6 md:mb-8 text-sm md:text-lg">Setelah siap dirancang, inilah masanya untuk mengekod, menguji, dan mencatatkan panduan sistem.</p>
+
+                            <div class="grid grid-cols-1 gap-4 md:gap-6 mb-8">
+                                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 items-start md:items-center">
+                                    <div class="w-12 h-12 md:w-16 md:h-16 rounded-full bg-slate-900 border-4 border-amber-500 flex items-center justify-center font-bold text-xl text-amber-400 flex-shrink-0">3</div>
+                                    <div>
+                                        <h3 class="font-bold text-white text-base md:text-lg mb-1">Melaksanakan Penyelesaian</h3>
+                                        <p class="text-sm text-slate-400">Proses menulis kod komputer (coding) menggunakan bahasa seperti Python/Java berdasarkan reka bentuk dari Fasa 2.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 items-start md:items-center">
+                                    <div class="w-12 h-12 md:w-16 md:h-16 rounded-full bg-slate-900 border-4 border-teal-500 flex items-center justify-center font-bold text-xl text-teal-400 flex-shrink-0">4</div>
+                                    <div>
+                                        <h3 class="font-bold text-white text-base md:text-lg mb-1">Menguji dan Menyah Ralat</h3>
+                                        <p class="text-sm text-slate-400">Menguji aplikasi yang dibina bagi memastikan ia bebas ralat (sintaks/masa larian/logik) dan memastikan outputnya tepat.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 items-start md:items-center">
+                                    <div class="w-12 h-12 md:w-16 md:h-16 rounded-full bg-slate-900 border-4 border-indigo-500 flex items-center justify-center font-bold text-xl text-indigo-400 flex-shrink-0">5</div>
+                                    <div>
+                                        <h3 class="font-bold text-white text-base md:text-lg mb-1">Mendokumentasi</h3>
+                                        <p class="text-sm text-slate-400">Menyediakan laporan. <strong>Dokumentasi dalaman:</strong> komen untuk kemudahan pengatur cara lain. <strong>Dokumentasi luaran:</strong> panduan/manual pengguna.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4">Latihan Tindakan</h3>
+                                <p class="text-sm text-slate-300 mb-4">Di manakah fasa yang memperlihatkan pengatur cara mula <strong>menaip kod menggunakan Perisian Pengekodan (IDE)</strong> di komputernya?</p>
+                                
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <button onclick="checkM2('3')" class="flex-1 bg-slate-700 hover:bg-amber-600 text-white px-6 py-3 md:py-2 rounded-lg font-semibold transition-colors text-sm border border-slate-600">Fasa 3</button>
+                                    <button onclick="checkM2('4')" class="flex-1 bg-slate-700 hover:bg-teal-600 text-white px-6 py-3 md:py-2 rounded-lg font-semibold transition-colors text-sm border border-slate-600">Fasa 4</button>
+                                    <button onclick="checkM2('5')" class="flex-1 bg-slate-700 hover:bg-indigo-600 text-white px-6 py-3 md:py-2 rounded-lg font-semibold transition-colors text-sm border border-slate-600">Fasa 5</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul3':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-teal-500/20 text-teal-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">1.7.2</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Antara Muka Bergrafik (GUI)</h2>
+                            </div>
+                            
+                            <p class="text-slate-300 mb-6 text-sm md:text-lg">Berbanding dengan paparan teks hitam putih (Command Line), aplikasi moden masa kini menggunakan GUI (Graphical User Interface) untuk berinteraksi dengan pengguna.</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8 md:mb-10">
+                                <div class="bg-slate-800 p-5 md:p-6 rounded-xl border border-slate-700">
+                                    <h3 class="text-lg md:text-xl font-bold text-white mb-4">Elemen-Elemen GUI</h3>
+                                    <ul class="text-slate-300 text-sm space-y-4">
+                                        <li class="flex items-center gap-3"><span class="bg-slate-700 px-3 py-1 rounded text-white border border-slate-600">Butang (Button)</span> Untuk tindakan/hantar.</li>
+                                        <li class="flex items-center gap-3"><input type="text" class="bg-slate-900 border border-slate-600 rounded px-2 w-24 pointer-events-none" placeholder="Teks..."> Ruang input data.</li>
+                                        <li class="flex items-center gap-3">
+                                            <select class="bg-slate-900 border border-slate-600 rounded px-2 w-24 pointer-events-none text-slate-500"><option>Pilih</option></select> 
+                                            Menu tarik-turun (Dropdown).
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="bg-slate-800 p-5 md:p-6 rounded-xl border border-slate-700">
+                                    <h3 class="text-lg md:text-xl font-bold text-white mb-4">Kebaikan GUI</h3>
+                                    <ul class="text-slate-400 text-sm space-y-3">
+                                        <li><i class="fas fa-star text-yellow-400 w-5"></i> Lebih mesra pengguna dan mudah difahami.</li>
+                                        <li><i class="fas fa-star text-yellow-400 w-5"></i> Tidak perlu menghafal kod arahan panjang.</li>
+                                        <li><i class="fas fa-star text-yellow-400 w-5"></i> Mempunyai tindak balas visual yang responsif.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4">Uji Minda</h3>
+                                <p class="text-sm text-slate-300 mb-4">Yang manakah antara berikut BUKAN contoh kawalan Antara Muka Bergrafik (GUI)?</p>
+                                
+                                <div class="flex flex-col sm:flex-row gap-2 md:gap-3">
+                                    <button onclick="checkM3('A')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-4 py-3 transition-colors text-sm font-semibold">A. Teks Hitam Putih (Command Line)</button>
+                                    <button onclick="checkM3('B')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-4 py-3 transition-colors text-sm font-semibold">B. Menu Tarik Turun (Dropdown)</button>
+                                    <button onclick="checkM3('C')" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded px-4 py-3 transition-colors text-sm font-semibold">C. Kotak Pilihan (Checkbox)</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'modul4':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-4 md:mb-6">
+                                <span class="bg-indigo-500/20 text-indigo-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold flex-shrink-0">1.7.2</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">Kitaran Penuh Pembangunan</h2>
+                            </div>
+                            
+                            <p class="text-slate-300 mb-6 text-sm md:text-lg">Kitaran SDLC bukan semestinya sehala. Jika terdapat ralat di fasa pengujian, kita akan berpatah balik ke fasa reka bentuk atau pelaksanaan.</p>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden mb-8 p-4 md:p-6 flex flex-col md:flex-row items-center gap-6 justify-center">
+                                <div class="flex items-center gap-2 font-bold text-slate-400 text-xs md:text-sm"><i class="fas fa-search text-rose-400"></i> Analisa</div>
+                                <i class="fas fa-chevron-right text-slate-600"></i>
+                                <div class="flex items-center gap-2 font-bold text-slate-400 text-xs md:text-sm"><i class="fas fa-pencil-ruler text-amber-400"></i> Reka Bentuk</div>
+                                <i class="fas fa-chevron-right text-slate-600"></i>
+                                <div class="flex items-center gap-2 font-bold text-white text-xs md:text-sm bg-slate-700 px-3 py-1 rounded"><i class="fas fa-code text-teal-400"></i> Laksana (Kod)</div>
+                                <i class="fas fa-exchange-alt text-blue-500"></i>
+                                <div class="flex items-center gap-2 font-bold text-white text-xs md:text-sm bg-slate-700 px-3 py-1 rounded"><i class="fas fa-bug text-rose-500"></i> Uji</div>
+                                <i class="fas fa-chevron-right text-slate-600"></i>
+                                <div class="flex items-center gap-2 font-bold text-slate-400 text-xs md:text-sm"><i class="fas fa-book text-indigo-400"></i> Dokumentasi</div>
+                            </div>
+
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 md:p-6">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-4">Aplikasi Dalam Dunia Sebenar</h3>
+                                <p class="text-sm text-slate-300 mb-4">Pengatur cara sering membangunkan <strong>Aplikasi Mudah Alih (Mobile Apps)</strong> untuk telefon pintar atau komputer tablet bagi menyelesaikan masalah pengguna secara kreatif.</p>
+                                
+                                <p class="text-sm text-slate-300 mb-4 border-t border-slate-700 pt-4 mt-4">Susunan yang manakah BETUL bagi proses SDLC?</p>
+                                
+                                <div class="flex flex-col gap-3">
+                                    <button onclick="checkM4('A')" class="bg-slate-700 hover:bg-indigo-600 text-white px-4 py-3 md:py-2 rounded-lg font-semibold transition-colors text-sm md:text-base border border-slate-600 text-left">A) Kod &rarr; Analisa &rarr; Uji &rarr; Lakar</button>
+                                    <button onclick="checkM4('B')" class="bg-slate-700 hover:bg-indigo-600 text-white px-4 py-3 md:py-2 rounded-lg font-semibold transition-colors text-sm md:text-base border border-slate-600 text-left">B) Analisa &rarr; Reka Bentuk &rarr; Pelaksanaan &rarr; Ujian &rarr; Dokumentasi</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'ujian':
+                    html = `
+                        <div class="animate-fade-in">
+                            <div class="flex items-center gap-3 mb-6">
+                                <span class="bg-yellow-500/20 text-yellow-400 py-1 px-3 rounded-full text-xs md:text-sm font-bold"><i class="fas fa-trophy mr-2"></i>BOSS</span>
+                                <h2 class="text-2xl md:text-3xl font-bold text-white">Ujian Penilaian Akhir</h2>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-5 md:p-8 shadow-2xl relative overflow-hidden">
+                                <div class="relative z-10">
+                                    <h3 class="text-lg md:text-xl font-bold text-white mb-6 border-b border-slate-700 pb-4">Jawab 15 soalan berikut dengan tepat untuk melengkapkan silibus Tingkatan 4.</h3>
+                                    
+                                    <div class="space-y-8 md:space-y-10">
+                                        <!-- Q1 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">1. Apakah maksud akronim SDLC?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq1" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">System Development Life Cycle</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq1" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Software Design Linear Code</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q2 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">2. Berapakah fasa utama SDLC di dalam silibus pembinaan perisian?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq2" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">3 Fasa</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq2" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">5 Fasa</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q3 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">3. Fasa apakah yang pertama sekali dilaksanakan?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq3" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Reka Bentuk</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq3" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Analisa Masalah (Keperluan)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q4 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">4. Menemubual pelanggan untuk mengetahui ciri sistem merujuk kepada fasa?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq4" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Fasa 1: Analisa Masalah</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq4" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Fasa 5: Dokumentasi</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q5 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">5. Proses melakar antara muka dan menulis carta alir (flowchart) dibuat pada fasa...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq5" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Fasa 2: Reka Bentuk Penyelesaian</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq5" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Fasa 4: Menguji & Menyah Ralat</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q6 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">6. Semasa fasa 'Melaksanakan Penyelesaian', apakah tindakan utama yang dibuat?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq6" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menemubual pelanggan</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq6" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menaip dan menulis kod (coding) ke dalam perisian</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q7 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">7. Mencari dan membaiki pepijat (bugs) adalah fungsi fasa...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq7" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Menguji dan menyah ralat</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq7" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Mendokumentasi</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q8 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">8. Mengapakah fasa Dokumentasi penting untuk jangka panjang?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq8" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Untuk membazirkan masa pengatur cara</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq8" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Sebagai rujukan untuk mengemaskini (maintain) perisian di masa hadapan</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q9 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">9. Apakah maksud GUI dalam pembinaan perisian?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq9" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Graphical User Interface (Antara Muka Bergrafik)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq9" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">General User Internet</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q10 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">10. Kenapakah aplikasi menggunakan GUI lebih disukai pengguna berbanding baris perintah (CLI)?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq10" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Ia lebih mesra pengguna dan mudah ditekan/berinteraksi</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq10" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Ia tidak mempunyai sebarang butang</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q11 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">11. Manakah antara berikut merupakan komponen GUI yang membolehkan pengguna menaip teks masuk?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq11" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Butang Pilihan (Radio Button)</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq11" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Kotak Teks (Text Box / Input Field)</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q12 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">12. Jika berlaku ralat semasa fasa Pengujian, apakah yang perlu dilakukan?</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq12" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Berpatah balik ke fasa Pelaksanaan untuk membetulkan kod tersebut</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq12" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Memadam keseluruhan projek</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q13 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">13. Penulisan 'komen' di dalam baris kod (// atau #) merupakan contoh bagi...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq13" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Dokumentasi Dalaman</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq13" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Dokumentasi Luaran</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q14 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">14. "Aplikasi mudah alih" (Mobile App) direka khas untuk beroperasi pada peranti...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq14" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Mesin Cetak</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq14" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Telefon pintar (Smartphone) dan Tablet</span></label>
+                                            </div>
+                                        </div>
+                                        <!-- Q15 -->
+                                        <div>
+                                            <p class="font-semibold text-slate-200 mb-3 text-sm md:text-base">15. Pada akhirnya, kitaran SDLC memastikan...</p>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq15" value="A" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Pembangunan aplikasi menjadi teratur, sistematik dan memenuhi objektif</span></label>
+                                                <label class="flex items-start gap-3 p-3 rounded bg-slate-800/50 border border-slate-700 cursor-pointer"><input type="radio" name="uq15" value="B" class="mt-1"><span class="text-slate-300 text-sm md:text-base">Program dihasilkan tanpa sebarang kod</span></label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button onclick="checkUjian()" class="w-full mt-10 bg-gradient-to-r from-rose-500 to-red-500 hover:from-rose-600 hover:to-red-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-rose-900/20 transform transition hover:-translate-y-1">Hantar Jawapan</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // --- Evaluators ---
+        function checkM1() {
+            const val = document.getElementById('m1-q1').value;
+            if (val === '2') {
+                if(!state.m1_done) { addXP(150); state.m1_done = true; }
+                showToast("Tepat!", "Melakar aliran sistem dan antara muka adalah proses Reka Bentuk (Fasa 2).");
+            } else if(val === "") {
+                showToast("Sila Pilih", "Anda belum membuat pilihan.", "error");
+            } else {
+                showToast("Salah", "Analisis masalah (Fasa 1) melibatkan mengutip data seperti temu bual.", "error");
+            }
+        }
+
+        function checkM2(val) {
+            if (val === '3') {
+                if(!state.m2_done) { addXP(150); state.m2_done = true; }
+                showToast("Tepat Sekali!", "Menaip kod adalah fasa Melaksanakan Penyelesaian (Fasa 3).");
+            } else {
+                showToast("Salah", "Fasa pengujian (4) dan dokumentasi (5) dibuat SELEPAS kod telah ditaip.", "error");
+            }
+        }
+
+        function checkM3(val) {
+            if (val === 'A') {
+                if(!state.m3_done) { addXP(100); state.m3_done = true; }
+                showToast("Pandai!", "Command Line (teks hitam putih) adalah antara muka asas, bukan Bergrafik (GUI).");
+            } else {
+                showToast("Kurang Tepat", "Kotak dan butang adalah komponen grafik (GUI).", "error");
+            }
+        }
+
+        function checkM4(val) {
+            if (val === 'B') {
+                if(!state.m4_done) { addXP(100); state.m4_done = true; }
+                showToast("Penyelesaian Sempurna!", "Itulah 5 susunan Fasa SDLC yang sebenar.");
+            } else {
+                showToast("Susunan Tersasar", "Kita mesti menganalisa terlebih dahulu sebelum mereka bentuk atau mengekod.", "error");
+            }
+        }
+
+        function checkUjian() {
+            const answers = { uq1: 'A', uq2: 'B', uq3: 'B', uq4: 'A', uq5: 'A', uq6: 'B', uq7: 'A', uq8: 'B', uq9: 'A', uq10: 'A', uq11: 'B', uq12: 'A', uq13: 'A', uq14: 'B', uq15: 'A' };
+            let allAnswered = true, allCorrect = true;
+
+            for (let i = 1; i <= 15; i++) {
+                const q = document.querySelector(`input[name="uq${i}"]:checked`);
+                if (!q) { allAnswered = false; break; }
+                if (q.value !== answers[`uq${i}`]) { allCorrect = false; }
+            }
+
+            if (!allAnswered) {
+                showToast("Perhatian", "Sila jawab kesemua 15 soalan.", "error"); return;
+            }
+
+            if (allCorrect) {
+                if(!state.ujian_done) { addXP(1000); state.ujian_done = true; }
+                document.getElementById('content-area').innerHTML = `
+                    <div class="animate-fade-in text-center pt-10 md:pt-20 pb-20">
+                        <i class="fas fa-medal text-7xl md:text-9xl text-rose-500 mb-8 drop-shadow-[0_0_30px_rgba(225,29,72,0.5)]"></i>
+                        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Tahniah! Anda Lulus Cemerlang.</h1>
+                        <p class="text-sm md:text-xl text-slate-300 max-w-2xl mx-auto px-4">Syabas! Anda telah tamat dan menguasai seluruh bab Pengaturcaraan bagi Sains Komputer Tingkatan 4. Anda kini bersedia membangunkan aplikasi menggunakan SDLC!</p>
+                        <p class="mt-8 text-xl md:text-2xl font-bold text-rose-400">Total XP: ${currentXP}</p>
+                        <div class="mt-12">
+                            <a href="index.html" class="inline-block bg-rose-600 hover:bg-rose-500 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl font-bold text-sm md:text-lg transition-colors shadow-lg shadow-rose-900/50">
+                                <i class="fas fa-home mr-2"></i> Kembali ke Portal Utama
+                            </a>
+                        </div>
+                    </div>
+                `;
+                window.scrollTo(0, 0);
+            } else {
+                showToast("Gagal", "Terdapat jawapan yang salah. Sila cuba lagi.", "error");
+            }
+        }
+
+        window.onload = () => { loadModule('modul1'); };
+    </script>
+</body>
+</html>
